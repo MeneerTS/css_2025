@@ -1,11 +1,8 @@
 import numpy as np
 from scipy.spatial import KDTree
-from concurrent.futures import ProcessPoolExecutor
-from functools import partial
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from collections import defaultdict
-
 
 
 class Flock:
