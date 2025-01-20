@@ -3,9 +3,11 @@ from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from collections import defaultdict
+from herd import Bizon, Herd
+from voting import random_herd
 
 
-class Flock:
+class Simulator:
     """
     We forgo defining birds as storing their information
     as numpy arrays allows us to work with them more efficiently
@@ -19,16 +21,17 @@ class Flock:
 
 
     """
-    def __init__(self, n):
+    def __init__(self, herd):
         
-        self.n = n                                  #number of birds
+                                       
         self.boundary_size = 200 
-        self.locations = np.random.rand(n,2)*self.boundary_size   #random pos between 0 and 100
-        self.directions = np.random.randn(n,2)      # unit vector
-        self.desireddirection = np.zeros((n,2))     # unit vector
+        self.locations, self.directions = herd.as_numpy()
+        self.n = len(self.locations)                            #number of birds
+        
+        self.desireddirection = np.zeros((self.n,2))     # unit vector
         self.eps = 2.                              # higher is more efficient neighbour search, but also extends the neighbour range randomly for some birds
-        self.r = 20                                 # range that birds see eachother
-        self.r_close = 7.5                           # range that birds try to avoid eachother
+        self.r = 20                                 # range that animals see eachother
+        self.r_close = 7.5                           # range that animals try to avoid eachother
         self.r_close = self.r_close**2              # squared for convenient computation                            
         self.seperation = 8.
         self.alignment = 2.
@@ -36,14 +39,14 @@ class Flock:
 
     def find_pairs(self,r):
         #returns indexes, only one way around 
-        #So [(bird1, bird2),(bird1,bird3),(bird2,bird4)...]
+        #So [(animal1, animal2),(animal1,animal3),(animal2,animal4)...]
         tree = KDTree(self.locations,compact_nodes=True,balanced_tree=True)
         pairs = tree.query_pairs(r,2.0,self.eps,'ndarray')
         return pairs
 
     def get_neigbours(self,r):
-        #Constructs a dictionary that to easily look up the neighbours of a certain bird
-        # key bird, item a list of neighbours
+        #Constructs a dictionary that to easily look up the neighbours of a certain animal
+        # key animal_id, item a list of neighbours
         pairs = self.find_pairs(r)
         output = defaultdict(list)
 
@@ -62,7 +65,7 @@ class Flock:
         #Hmm, probably possible to optimize this
         #If you have a matrix of nxn with which bird is near which bird
 
-        #Turns out! No! The fact that every bird has few neighbours (compared to the 1000 other birds) makes it not worth
+        #Turns out! No! The fact that every animal has few neighbours (compared to the 1000 other animals) makes it not worth
         #vectorizing everything, dictionaries rule! 
         for boid in neigbourdict.keys():
             
@@ -91,12 +94,12 @@ class Flock:
     def update(self):
         self.apply_rules()        
         
-        #Make it so the birds can only turn a certain amount
+        #Make it so the animals can only turn a certain amount
         #They can not just turn around suddenly
         self.directions = self.directions * 5 + self.desireddirections 
         
         #Make sure we always have unit speed and just change direction
-        #Birds can not fly backwards anyway
+        #Animals do not go backwards anyway
         self.directions = self.directions / (np.expand_dims(np.linalg.norm(self.directions,axis=1),1) + 0.000001)
         
         self.locations += self.directions   
@@ -105,16 +108,18 @@ class Flock:
 
 
 if __name__ == "__main__":
-    flock = Flock(250)
+
+    this_herd = random_herd(50,100)
+    this_sim = Simulator(this_herd)
     #print(flock.directions)
     #print(flock.desireddirection)
     fig, ax = plt.subplots()
-    ax.set(xlim=[0, 1000], ylim=[0, 1000])
-    scat = ax.scatter(flock.locations.T[0], flock.locations.T[1], c="b", s=5)
+    ax.set(xlim=[0, 200], ylim=[0, 200])
+    scat = ax.scatter(this_sim.locations.T[0], this_sim.locations.T[1], c="b", s=5)
 
     def draw_boids(frame):
-        flock.update()
-        scat.set_offsets(flock.locations)
+        this_sim.update()
+        scat.set_offsets(this_sim.locations)
 
 
     #print(flock.locations)
