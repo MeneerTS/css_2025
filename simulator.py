@@ -3,7 +3,7 @@ from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from collections import defaultdict
-from herd import Bizon, Herd
+from herd import Bison, Herd
 from voting import random_herd
 
 
