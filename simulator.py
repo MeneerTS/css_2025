@@ -21,10 +21,10 @@ class Simulator:
 
     """
     def __init__(self, herd):
-        
+
                                        
         self.boundary_size = 200 
-        self.locations, self.directions = herd.as_numpy()
+        self.locations, self.directions, self.votes = herd.as_numpy()
         self.n = len(self.locations)                            #number of birds
         
         self.desireddirection = np.zeros((self.n,2))     # unit vector
@@ -32,6 +32,7 @@ class Simulator:
         self.r = 20                                 # range that animals see eachother
         self.r_close = 7.5                           # range that animals try to avoid eachother
         self.r_close = self.r_close**2              # squared for convenient computation                            
+        
         self.seperation = 8.
         self.alignment = 2.
         self.cohesion = 1.
@@ -66,26 +67,26 @@ class Simulator:
 
         #Turns out! No! The fact that every animal has few neighbours (compared to the 1000 other animals) makes it not worth
         #vectorizing everything, dictionaries rule! 
-        for boid in neigbourdict.keys():
+        for bison in neigbourdict.keys():
             
             #Try to head the same way as the flock
-            headings = self.directions[neigbourdict[boid]]
-            accelerations[boid] += np.mean(headings,axis=0) * self.alignment 
+            headings = self.directions[neigbourdict[bison]]
+            accelerations[bison] += np.mean(headings,axis=0) * self.alignment 
             
             
             #Go towards the flock
-            neigbour_locations = self.locations[neigbourdict[boid]]
-            accelerations[boid] += np.mean(neigbour_locations - self.locations[boid],axis=0) * self.cohesion
+            neigbour_locations = self.locations[neigbourdict[bison]]
+            accelerations[bison] += np.mean(neigbour_locations - self.locations[bison],axis=0) * self.cohesion
             
 
             #at each neighbours index it says 1 or 0 if it is close or not
-            close_neigbours = np.where(np.sum((neigbour_locations - self.locations[boid]) ** 2, axis=1) < self.r_close,True,False)            
+            close_neigbours = np.where(np.sum((neigbour_locations - self.locations[bison]) ** 2, axis=1) < self.r_close,True,False)            
             close_locations = neigbour_locations[close_neigbours]
             if len(close_locations) > 0:
                 #Steer away from very close neighbours
                 #Here we take the mean
                 #This is equivalent to steering away from every neighbour seperatly (and scaling down)
-                accelerations[boid] += np.mean(self.locations[boid] - close_locations, axis=0) * self.seperation
+                accelerations[bison] += np.mean(self.locations[bison] - close_locations, axis=0) * self.seperation
         #Normalise
         self.desireddirections = accelerations / (np.expand_dims(np.linalg.norm(accelerations,axis=1),1) + 0.000001)
     
@@ -108,7 +109,7 @@ class Simulator:
 
 if __name__ == "__main__":
 
-    this_herd = Herd(90, [100, 100], 10)
+    this_herd = Herd(90, [100, 100], 45)
     random_vote(this_herd)
     this_sim = Simulator(this_herd)
     #print(flock.directions)

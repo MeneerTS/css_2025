@@ -18,10 +18,12 @@ class Herd:
     def as_numpy(self):
         locations = []
         directions = []
+        votes = []
         for bison in self.bisons:
             locations.append(list(bison.position))
             directions.append(list(bison.direction))
-        return np.array(locations), np.array(directions)
+            votes.append(list(bison.vote))
+        return np.array(locations), np.array(directions), np.array(votes)
 
 class Bison:  
     #bisons can have many properties!
@@ -30,4 +32,5 @@ class Bison:
     def __init__(self,position,direction):
         self.position = position
         self.direction = direction
+        self.vote = direction
         #self.hunger, self.size etc etc...
