@@ -9,8 +9,7 @@ from voting import random_herd
 
 class Simulator:
     """
-    We forgo defining birds as storing their information
-    as numpy arrays allows us to work with them more efficiently
+    We convert the herds into numpy arrays as those are more efficient to work with.
 
     We also change the way we think about location, velocity and accelerations
     to a direction approach. This almost completely is implemented the same way.
