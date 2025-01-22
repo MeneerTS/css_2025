@@ -20,10 +20,10 @@ class Simulator:
 
 
     """
-    def __init__(self, herd):
+    def __init__(self, herd, boundary_size=1000):
 
                                        
-        self.boundary_size = 1000 
+        self.boundary_size = boundary_size 
         self.locations, self.directions, self.votes = herd.as_numpy()
         self.n = len(self.locations)                            #number of birds
         
@@ -33,10 +33,10 @@ class Simulator:
         self.r_close = 7.5                           # range that animals try to avoid eachother
         self.r_close = self.r_close**2              # squared for convenient computation                            
         
-        self.seperation = 1.
+        self.seperation = 2.
         self.alignment = 2.
         self.cohesion = 1.
-        self.vote_bias = 0
+        self.vote_bias = 1
         self.momentum_bias = 2.
 
     def find_pairs(self,r):
@@ -117,7 +117,8 @@ class Simulator:
 
 if __name__ == "__main__":
 
-    this_herd = Herd(90, [2500, 2500], 12)
+    grid_size = 200
+    this_herd = Herd(90, [grid_size//2, grid_size//2], 12)
     random_vote(this_herd)
 
     # for bison in this_herd.bisons:
@@ -125,17 +126,27 @@ if __name__ == "__main__":
     #     dir /= np.linalg.norm(dir)
     #     bison.direction = dir
 
-    this_sim = Simulator(this_herd)
+    this_sim = Simulator(this_herd, grid_size)
     #print(flock.directions)
     #print(flock.desireddirection)
     fig, ax = plt.subplots()
-    ax.set(xlim=[0, 1000], ylim=[0, 1000])
+    ax.set(xlim=[0, grid_size], ylim=[0, grid_size])
+
+    herd_center_x = []
+    herd_center_y = []
+    trace = ax.plot([], [], c="blue")
 
     scat = ax.scatter(this_sim.locations.T[0], this_sim.locations.T[1], c="brown", s=5)
 
-    def draw_boids(frame):
+    def draw_bisons(frame):
         this_sim.update()
         scat.set_offsets(this_sim.locations)
+        herd_center = np.mean(this_sim.locations, axis=0)
+        # Append the new center to the trace lists
+        herd_center_x.append(herd_center[0])
+        herd_center_y.append(herd_center[1])
+        trace[0].set_data(herd_center_x, herd_center_y)
+
 
 
     #print(flock.locations)
@@ -143,10 +154,10 @@ if __name__ == "__main__":
     print(this_sim.votes)
     avg_vote = np.mean(this_sim.votes, axis=0)
     avg_vote /= np.linalg.norm(avg_vote)
-    avg_vote *= 333
+    avg_vote *= grid_size//3
     print(avg_vote)
 
-    plt.quiver(500, 500, avg_vote[0], avg_vote[1], angles='xy', scale_units='xy', scale=1, color='red', alpha=0.6) 
+    plt.quiver(grid_size//2, grid_size//2, avg_vote[0], avg_vote[1], angles='xy', scale_units='xy', scale=1, color='red', alpha=0.6) 
 
-    animation = FuncAnimation(fig, draw_boids, frames=50, interval=2)
+    animation = FuncAnimation(fig, draw_bisons, frames=50, interval=200)
     plt.show()
