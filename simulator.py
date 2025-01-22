@@ -23,7 +23,7 @@ class Simulator:
     def __init__(self, herd):
 
                                        
-        self.boundary_size = 200 
+        self.boundary_size = 1000 
         self.locations, self.directions, self.votes = herd.as_numpy()
         self.n = len(self.locations)                            #number of birds
         
@@ -33,9 +33,11 @@ class Simulator:
         self.r_close = 7.5                           # range that animals try to avoid eachother
         self.r_close = self.r_close**2              # squared for convenient computation                            
         
-        self.seperation = 8.
+        self.seperation = 1.
         self.alignment = 2.
         self.cohesion = 1.
+        self.vote_bias = 0
+        self.momentum_bias = 2.
 
     def find_pairs(self,r):
         #returns indexes, only one way around 
@@ -69,12 +71,13 @@ class Simulator:
         #vectorizing everything, dictionaries rule! 
         for bison in neigbourdict.keys():
             
-            #Try to head the same way as the flock
+            #Try to head the same way as the neighbours
             headings = self.directions[neigbourdict[bison]]
-            accelerations[bison] += np.mean(headings,axis=0) * self.alignment 
+            mean_heading = np.mean(headings,axis=0)
+            accelerations[bison] += mean_heading / (np.linalg.norm(mean_heading) + 0.000001) * self.alignment 
             
             
-            #Go towards the flock
+            #Go towards the neighbours
             neigbour_locations = self.locations[neigbourdict[bison]]
             accelerations[bison] += np.mean(neigbour_locations - self.locations[bison],axis=0) * self.cohesion
             
@@ -86,7 +89,12 @@ class Simulator:
                 #Steer away from very close neighbours
                 #Here we take the mean
                 #This is equivalent to steering away from every neighbour seperatly (and scaling down)
-                accelerations[bison] += np.mean(self.locations[bison] - close_locations, axis=0) * self.seperation
+                # print(1 / np.linalg.norm(self.locations[bison] - close_locations, axis=1))
+                accelerations[bison] += np.average(self.locations[bison] - close_locations, axis=0, weights=(1 / np.linalg.norm(self.locations[bison] - close_locations, axis=1))) * self.seperation
+
+            # Try to go towards intital vote
+            accelerations[bison] += self.votes[bison] * self.vote_bias
+            
         #Normalise
         self.desireddirections = accelerations / (np.expand_dims(np.linalg.norm(accelerations,axis=1),1) + 0.000001)
     
@@ -96,7 +104,7 @@ class Simulator:
         
         #Make it so the animals can only turn a certain amount
         #They can not just turn around suddenly
-        self.directions = self.directions * 5 + self.desireddirections 
+        self.directions = self.directions * self.momentum_bias + self.desireddirections 
         
         #Make sure we always have unit speed and just change direction
         #Animals do not go backwards anyway
@@ -109,13 +117,20 @@ class Simulator:
 
 if __name__ == "__main__":
 
-    this_herd = Herd(90, [100, 100], 45)
+    this_herd = Herd(90, [2500, 2500], 12)
     random_vote(this_herd)
+
+    # for bison in this_herd.bisons:
+    #     dir = np.random.rand(2) * 2 - 1
+    #     dir /= np.linalg.norm(dir)
+    #     bison.direction = dir
+
     this_sim = Simulator(this_herd)
     #print(flock.directions)
     #print(flock.desireddirection)
     fig, ax = plt.subplots()
-    ax.set(xlim=[0, 200], ylim=[0, 200])
+    ax.set(xlim=[0, 1000], ylim=[0, 1000])
+
     scat = ax.scatter(this_sim.locations.T[0], this_sim.locations.T[1], c="brown", s=5)
 
     def draw_boids(frame):
@@ -125,6 +140,13 @@ if __name__ == "__main__":
 
     #print(flock.locations)
     #print(flock.find_pairs(30))
+    print(this_sim.votes)
+    avg_vote = np.mean(this_sim.votes, axis=0)
+    avg_vote /= np.linalg.norm(avg_vote)
+    avg_vote *= 333
+    print(avg_vote)
 
-    animation = FuncAnimation(fig, draw_boids, frames=50, interval=30)
+    plt.quiver(500, 500, avg_vote[0], avg_vote[1], angles='xy', scale_units='xy', scale=1, color='red', alpha=0.6) 
+
+    animation = FuncAnimation(fig, draw_boids, frames=50, interval=2)
     plt.show()

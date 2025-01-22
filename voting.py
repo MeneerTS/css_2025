@@ -2,6 +2,6 @@ import numpy as np
 
 def random_vote(herd):
     for bison in herd.bisons:
-        direction = np.random.rand(2)
-        direction /= np.linalg.norm(direction)
-        bison.direction = direction
+        vote = np.random.rand(2) * 2 - 1
+        vote /= np.linalg.norm(vote)
+        bison.vote = vote

@@ -29,7 +29,7 @@ class Bison:
     #bisons can have many properties!
     #Perhaps these properties can be used in voting
     #only position and direction are currently used in the simulation
-    def __init__(self,position,direction):
+    def __init__(self,position, direction):
         self.position = position
         self.direction = direction
         self.vote = direction
