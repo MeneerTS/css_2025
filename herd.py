@@ -9,9 +9,7 @@ class Herd:
             x = center[0] + r * np.cos(theta)
             y = center[1] + r * np.sin(theta)
             positions = np.stack((x, y), axis=-1)
-            directions = np.random.rand(count, 2)
-            directions /= np.linalg.norm(directions, axis=1, keepdims=True)
-            self.bisons = [Bison(pos, dir) for pos, dir in zip(positions, directions)]
+            self.bisons = [Bison(pos, np.zeros(2)) for pos in positions]
 
 
     def add_bison(self, bison):
