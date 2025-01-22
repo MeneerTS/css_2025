@@ -3,7 +3,7 @@ from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from collections import defaultdict
-from herd import Bizon, Herd
+from herd import Bison, Herd
 from voting import random_herd
 
 
@@ -109,7 +109,8 @@ class Simulator:
 
 if __name__ == "__main__":
 
-    this_herd = random_herd(50,100)
+    # this_herd = random_herd(50,100)
+    this_herd = Herd(50, [100, 100], 10)
     this_sim = Simulator(this_herd)
     #print(flock.directions)
     #print(flock.desireddirection)
