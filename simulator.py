@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from collections import defaultdict
 from herd import Bison, Herd
-from voting import random_herd
+from voting import random_vote
 
 
 class Simulator:
@@ -109,14 +109,14 @@ class Simulator:
 
 if __name__ == "__main__":
 
-    # this_herd = random_herd(50,100)
-    this_herd = Herd(50, [100, 100], 10)
+    this_herd = Herd(90, [100, 100], 10)
+    random_vote(this_herd)
     this_sim = Simulator(this_herd)
     #print(flock.directions)
     #print(flock.desireddirection)
     fig, ax = plt.subplots()
     ax.set(xlim=[0, 200], ylim=[0, 200])
-    scat = ax.scatter(this_sim.locations.T[0], this_sim.locations.T[1], c="b", s=5)
+    scat = ax.scatter(this_sim.locations.T[0], this_sim.locations.T[1], c="brown", s=5)
 
     def draw_boids(frame):
         this_sim.update()
