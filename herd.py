@@ -21,16 +21,16 @@ class Herd:
         votes = []
         for bison in self.bisons:
             locations.append(list(bison.position))
-            directions.append(list(bison.direction))
+            # directions.append(list(bison.direction))
             votes.append(list(bison.vote))
-        return np.array(locations), np.array(directions), np.array(votes)
+        return np.array(locations), np.array(votes)
 
 class Bison:  
     #bisons can have many properties!
     #Perhaps these properties can be used in voting
     #only position and direction are currently used in the simulation
-    def __init__(self,position, direction):
+    def __init__(self,position, vote):
         self.position = position
-        self.direction = direction
-        self.vote = direction
+        # self.direction = direction
+        self.vote = vote
         #self.hunger, self.size etc etc...

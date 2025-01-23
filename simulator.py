@@ -1,3 +1,4 @@
+import random
 import numpy as np
 from scipy.spatial import KDTree
 import matplotlib.pyplot as plt
@@ -119,7 +120,7 @@ if __name__ == "__main__":
 
     grid_size = 200
     this_herd = Herd(90, [grid_size//2, grid_size//2], 12)
-    random_vote(this_herd)
+    random_vote(this_herd, 2)
 
     # for bison in this_herd.bisons:
     #     dir = np.random.rand(2) * 2 - 1
@@ -153,6 +154,11 @@ if __name__ == "__main__":
     #print(flock.find_pairs(30))
     print(this_sim.votes)
     avg_vote = np.mean(this_sim.votes, axis=0)
+    if avg_vote[0] == 0 and avg_vote[1] == 0:
+        avg_vote = np.array([random.randint(0, 1), 0])
+    
+    # This is majority voting should rename i guess
+
     avg_vote /= np.linalg.norm(avg_vote)
     avg_vote *= grid_size//3
     print(avg_vote)
