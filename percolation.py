@@ -61,9 +61,9 @@ if __name__ == "__main__":
     # Create lines between points within range
     for i, neighbors in enumerate(points_within_range):
         for j in neighbors:
-            ax.plot([sim.locations[i][0], sim.locations[j][0]], [sim.locations[i][1], sim.locations[j][1]], c="black", alpha=0.1)
+            ax.plot([sim.locations[i][0], sim.locations[j][0]], [sim.locations[i][1], sim.locations[j][1]], c="gray", alpha=1, zorder=0)
 
-    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5)
+    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
 
     def update(frame):
         if sim.num_voted == sim.num_voters:
