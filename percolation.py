@@ -48,13 +48,13 @@ def simulate_voting(sim,r):
             return
         if sim.num_voted < sim.num_voters:
             votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
-            infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-            #print(infulence)
-            infulence = (infulence[0] - infulence[1]) / 2
-            # infulence = 0
-            assert -0.5 <= infulence <= 0.5
+            influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
+            #print(influence)
+            influence = (influence[0] - influence[1]) / 2
+            # influence = 0
+            assert -0.5 <= influence <= 0.5
                 
-            voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + infulence)
+            voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + influence)
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
 def unvoted_vote(sim,r): 
@@ -64,16 +64,16 @@ def unvoted_vote(sim,r):
 
     for unvotedindex in range(sim.num_voted,sim.herd_size):
         votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
-        infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-        #print(infulence)
-        #infulence = (infulence[0] - infulence[1]) / 2
-        #assert -0.5 <= infulence <= 0.5
+        influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
+        #print(influence)
+        #influence = (influence[0] - influence[1]) / 2
+        #assert -0.5 <= influence <= 0.5
         if len(votes_neighbours) > 0:
             #If there is a neighbour we look
             #At which has the most influence
             #and do that vote
-            infulence = infulence[0] > infulence[1]
-            voting.random_vote_indexed(sim.herd, unvotedindex, infulence)
+            influence = influence[0] > influence[1]
+            voting.random_vote_indexed(sim.herd, unvotedindex, influence)
         else:
             #Otherwise do random
             voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
@@ -103,7 +103,7 @@ def plot_voting(sim,r):
 
 def analyze_voting_thijs():
     
-    r = 15
+    r = 1
     sim = Sim()
     simulate_voting(sim,r)
     print(np.mean(sim.votes,axis=0))
@@ -115,6 +115,8 @@ def analyze_voting_thijs():
 
 if __name__ == "__main__":
     
+    # analyze_voting_thijs()
+    # exit()
     r = 10
     sim = Sim()
 
@@ -146,13 +148,13 @@ if __name__ == "__main__":
         if sim.num_voted < sim.num_voters:
             circle.center = sim.locations[sim.num_voted]
             votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
-            infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-            print(infulence)
-            infulence = (infulence[0] - infulence[1]) / 2
-            # infulence = 0
-            assert -0.5 <= infulence <= 0.5
+            influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
+            print(influence)
+            influence = (influence[0] - influence[1]) / 2
+            # influence = 0
+            assert -0.5 <= influence <= 0.5
                 
-            voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + infulence)
+            voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + influence)
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
             colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
