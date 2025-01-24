@@ -46,7 +46,7 @@ def simulate_voting(sim,r):
     points_within_range = sim.compute_neighbours(r)
     while True:
         if sim.num_voted >= sim.num_voters:
-            return
+            return points_within_range
         if sim.num_voted < sim.num_voters:
             votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
             influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
@@ -58,11 +58,10 @@ def simulate_voting(sim,r):
             voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + influence)
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
-def unvoted_vote(sim,r): 
-    points_within_range = sim.compute_neighbours(r)
-    #The unvoted bizons go with the majority in their radius
+def unvoted_vote(sim,points_within_range): 
+   
+    #The unvoted bizons go with the majority in their radius, or random if there are none
     
-
     for unvotedindex in range(sim.num_voted,sim.herd_size):
         votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
         influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
@@ -105,25 +104,26 @@ def plot_voting(sim,r):
 
 def r_analysis():
     total_results = []
-    num_r_values_to_test = 10
+    num_r_values_to_test = 100
     num_voters = 100
     num_non_voters = 0
+    total_cows = num_voters + num_non_voters
     for r_value in range(0,100,100 // num_r_values_to_test):
         print(r_value)
         results = []
-        for i in range(100):
+        for i in range(500):
             r = r_value
-            sim = Sim(num_voters + num_non_voters,num_voters)
-            simulate_voting(sim,r)
+            sim = Sim(total_cows,num_voters)
+            points_within_range = simulate_voting(sim,r)
             
             #pretty_pic(sim,r)
-            unvoted_vote(sim,r)
+            unvoted_vote(sim,points_within_range)
             #pretty_pic(sim,r)
             mean_votes = np.mean(sim.votes,axis=0)
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
         total_results.append(np.mean(results))
     
-    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_r_{num_r_values_to_test}_r_plot",total_results)
+    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_r_{num_r_values_to_test}_r_plot2",total_results)
     fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
 
     
