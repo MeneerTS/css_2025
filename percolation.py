@@ -1,5 +1,3 @@
-from collections import defaultdict
-from time import sleep
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from herd import Herd
@@ -8,7 +6,7 @@ import numpy as np
 
 class Sim:
     def __init__(self):
-        self.herd_size = 50
+        self.herd_size = 100
         self.herd = Herd(self.herd_size, [100, 100], 50)
         # This should create a herd of herd_size bisons
         assert len(self.herd.bisons) == self.herd_size
@@ -45,7 +43,7 @@ class Sim:
 
 if __name__ == "__main__":
 
-    r = 30
+    r = 10
     sim = Sim()
 
     fig, axs = plt.subplots(1, 2)
@@ -73,6 +71,7 @@ if __name__ == "__main__":
             infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
             print(infulence)
             infulence = (infulence[0] - infulence[1]) / 2
+            # infulence = 0
             assert -0.5 <= infulence <= 0.5
                 
             voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + infulence)
@@ -82,7 +81,7 @@ if __name__ == "__main__":
             scat.set_facecolor(colors)
             print(sim.num_voted)
 
-    animation = FuncAnimation(fig, update, frames=50, interval=20)
+    animation = FuncAnimation(fig, update, frames=50, interval=200)
 
     plt.show()
 
