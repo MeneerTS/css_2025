@@ -101,7 +101,33 @@ def plot_voting(sim,r):
     scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
     plt.show()
 
-def analyze_voting_thijs():
+
+def r_analysis():
+    total_results = []
+    for r_value in range(0,100,1):
+        print(r_value)
+        results = []
+        for i in range(100):
+            r = r_value
+            sim = Sim()
+            simulate_voting(sim,r)
+            
+            #pretty_pic(sim,r)
+            unvoted_vote(sim,r)
+            #pretty_pic(sim,r)
+            mean_votes = np.mean(sim.votes,axis=0)
+            results.append(np.abs(mean_votes[0] - mean_votes[1]))
+        total_results.append(np.mean(results))
+    
+    np.save("numpy_files\\1000_r_plot",total_results)
+    fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
+
+    
+    axs.plot(np.arange(100),total_results)
+    
+
+    plt.show()
+def histogram_analysis():
     
     results = []
     for i in range(100):
@@ -127,7 +153,8 @@ def analyze_voting_thijs():
 if __name__ == "__main__":
     
     #analyze_voting_thijs()
-    #exit()
+    r_analysis()
+    exit()
     r = 10
     sim = Sim()
 
