@@ -58,9 +58,10 @@ def simulate_voting(sim,r):
             voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + influence)
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
-def unvoted_vote(sim,points_within_range): 
+def unvoted_vote(sim,points_within_range,use_random=True): 
    
-    #The unvoted bizons go with the majority in their radius, or random if there are none
+    #The unvoted bizons go with the majority in their radius, or random if there are none (only when use_random is enabled, otherwise no vote is cast)
+    
     
     for unvotedindex in range(sim.num_voted,sim.herd_size):
         votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
@@ -74,13 +75,32 @@ def unvoted_vote(sim,points_within_range):
             #and do that vote
             influence = influence[0] > influence[1]
             voting.random_vote_indexed(sim.herd, unvotedindex, influence)
-        else:
+        elif use_random:
             #Otherwise do random
             voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
     #update only at the end
     sim.locations, sim.votes = sim.herd.as_numpy()  
         
 def plot_voting(sim,r):
+    fig, axs = plt.subplots(1, 2)
+    ax = axs[0]
+    ax.set_aspect('equal')
+    ax.set(xlim=[0, 200], ylim=[0, 200])
+
+    colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
+    
+
+
+    points_within_range = sim.compute_neighbours(r)
+
+   
+
+    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
+    plt.show()
+
+def plot_spheres_of_influence(sim,r):
+    #plots circles around every voting cow
+    #Even if the unvoting cows have voted through some other means!
     fig, axs = plt.subplots(1, 2)
     ax = axs[0]
     ax.set_aspect('equal')
@@ -97,10 +117,11 @@ def plot_voting(sim,r):
     #for i, neighbors in enumerate(points_within_range):
     #    for j in neighbors:
     #        ax.plot([sim.locations[i][0], sim.locations[j][0]], [sim.locations[i][1], sim.locations[j][1]], c="gray", alpha=1, zorder=0)
-
+    for locationid in range(sim.num_voters):
+        circle = plt.Circle(sim.locations[locationid], r, fill=False)
+        ax.add_patch(circle) 
     scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
     plt.show()
-
 
 def r_analysis():
     total_results = []
@@ -137,10 +158,10 @@ def histogram_analysis():
     for i in range(100):
         r = 50
         sim = Sim()
-        simulate_voting(sim,r)
+        points_within_range = simulate_voting(sim,r)
         
         #pretty_pic(sim,r)
-        unvoted_vote(sim,r)
+        unvoted_vote(sim,points_within_range)
         #pretty_pic(sim,r)
         mean_votes = np.mean(sim.votes,axis=0)
         results.append(mean_votes[0])
@@ -152,12 +173,22 @@ def histogram_analysis():
     
 
     plt.show()
-            
+
+def voting_test():
+    r = 10
+    sim = Sim(herd_size=1000)
+    points_within_range = simulate_voting(sim,r)
+    plot_spheres_of_influence(sim,r)
+    unvoted_vote(sim,points_within_range,use_random=False)
+    plot_spheres_of_influence(sim,r)
+    #plot_voting(sim,r)
+    #unvoted_vote(sim,points_within_range)
+    #plot_voting(sim,r)
 
 if __name__ == "__main__":
     
     #analyze_voting_thijs()
-    r_analysis()
+    voting_test()
     exit()
     r = 10
     sim = Sim()
