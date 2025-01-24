@@ -72,7 +72,7 @@ def unvoted_vote(sim,r):
             #If there is a neighbour we look
             #At which has the most influence
             #and do that vote
-            infulence = infulence[0] < infulence[1]
+            infulence = infulence[0] > infulence[1]
             voting.random_vote_indexed(sim.herd, unvotedindex, infulence)
         else:
             #Otherwise do random
@@ -103,14 +103,15 @@ def plot_voting(sim,r):
 
 def analyze_voting_thijs():
     
-    r = 10
+    r = 15
     sim = Sim()
     simulate_voting(sim,r)
-    pretty_pic(sim,r)
+    print(np.mean(sim.votes,axis=0))
+    #pretty_pic(sim,r)
     unvoted_vote(sim,r)
-    pretty_pic(sim,r)
+    #pretty_pic(sim,r)
+    print(np.mean(sim.votes,axis=0))
     
-
 
 if __name__ == "__main__":
     
