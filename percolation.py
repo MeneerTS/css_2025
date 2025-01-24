@@ -51,12 +51,18 @@ if __name__ == "__main__":
     ax.set_aspect('equal')
     ax.set(xlim=[0, 200], ylim=[0, 200])
 
-    colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "brown" for vote in sim.votes]
+    colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
     circle = plt.Circle(sim.locations[0], r, fill=False)
     ax.add_patch(circle) 
 
 
     points_within_range = sim.compute_neighbours(r)
+
+    # Create lines between points within range
+    for i, neighbors in enumerate(points_within_range):
+        for j in neighbors:
+            ax.plot([sim.locations[i][0], sim.locations[j][0]], [sim.locations[i][1], sim.locations[j][1]], c="black", alpha=0.1)
+
     scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5)
 
     def update(frame):
@@ -77,7 +83,7 @@ if __name__ == "__main__":
             voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + infulence)
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
-            colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "brown" for vote in sim.votes]
+            colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
             scat.set_facecolor(colors)
             print(sim.num_voted)
 
