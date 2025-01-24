@@ -39,6 +39,30 @@ class Sim:
 
         return points_within_range
 
+def simulate_voting(sim,r):
+    #simulates a voting cycle without making any pictures
+    points_within_range = sim.compute_neighbours(r)
+    while True:
+        if sim.num_voted >= sim.num_voters:
+            return
+        if sim.num_voted < sim.num_voters:
+            votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
+            infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
+            print(infulence)
+            infulence = (infulence[0] - infulence[1]) / 2
+            # infulence = 0
+            assert -0.5 <= infulence <= 0.5
+                
+            voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + infulence)
+            sim.locations, sim.votes = sim.herd.as_numpy()
+            sim.num_voted += 1
+            
+
+def analyze_voting_thijs():
+    
+    r = 10
+    sim = Sim()
+    simulate_voting(sim,r)
 
 
 if __name__ == "__main__":
