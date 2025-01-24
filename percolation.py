@@ -3,6 +3,7 @@ from matplotlib.animation import FuncAnimation
 from herd import Herd
 import voting
 import numpy as np
+import copy
 
 class Sim:
     def __init__(self):
@@ -48,7 +49,7 @@ def simulate_voting(sim,r):
         if sim.num_voted < sim.num_voters:
             votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
             infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-            print(infulence)
+            #print(infulence)
             infulence = (infulence[0] - infulence[1]) / 2
             # infulence = 0
             assert -0.5 <= infulence <= 0.5
@@ -56,17 +57,63 @@ def simulate_voting(sim,r):
             voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + infulence)
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
-            
+def unvoted_vote(sim,r): 
+    points_within_range = sim.compute_neighbours(r)
+    #The unvoted bizons go with the majority in their radius
+    
+
+    for unvotedindex in range(sim.num_voted,sim.herd_size):
+        votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
+        infulence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
+        #print(infulence)
+        #infulence = (infulence[0] - infulence[1]) / 2
+        #assert -0.5 <= infulence <= 0.5
+        if len(votes_neighbours) > 0:
+            #If there is a neighbour we look
+            #At which has the most influence
+            #and do that vote
+            infulence = infulence[0] < infulence[1]
+            voting.random_vote_indexed(sim.herd, unvotedindex, infulence)
+        else:
+            #Otherwise do random
+            voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
+    #update only at the end
+    sim.locations, sim.votes = sim.herd.as_numpy()  
+        
+def plot_voting(sim,r):
+    fig, axs = plt.subplots(1, 2)
+    ax = axs[0]
+    ax.set_aspect('equal')
+    ax.set(xlim=[0, 200], ylim=[0, 200])
+
+    colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
+    #circle = plt.Circle(sim.locations[0], r, fill=False)
+    #ax.add_patch(circle) 
+
+
+    points_within_range = sim.compute_neighbours(r)
+
+    # Create lines between points within range
+    #for i, neighbors in enumerate(points_within_range):
+    #    for j in neighbors:
+    #        ax.plot([sim.locations[i][0], sim.locations[j][0]], [sim.locations[i][1], sim.locations[j][1]], c="gray", alpha=1, zorder=0)
+
+    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
+    plt.show()
 
 def analyze_voting_thijs():
     
     r = 10
     sim = Sim()
     simulate_voting(sim,r)
+    pretty_pic(sim,r)
+    unvoted_vote(sim,r)
+    pretty_pic(sim,r)
+    
 
 
 if __name__ == "__main__":
-
+    
     r = 10
     sim = Sim()
 
