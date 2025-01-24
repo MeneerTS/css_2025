@@ -29,14 +29,14 @@ class Sim:
     def compute_neighbours(self, r):
         # Compute pairwise distances
         pairwise_distances = np.linalg.norm(self.locations[:, np.newaxis] - self.locations, axis=2)
-        print(pairwise_distances)
+        #print(pairwise_distances)
 
         # Find points within the range for each point
         points_within_range = [np.where((pairwise_distances[i] <= r) & (pairwise_distances[i] != 0))[0] for i in range(len(self.locations))]
-        print(points_within_range)
+        #print(points_within_range)
         # Display results
-        for i, neighbors in enumerate(points_within_range):
-            print(f"Points within range of {i}: {neighbors}")
+        #for i, neighbors in enumerate(points_within_range):
+        #    print(f"Points within range of {i}: {neighbors}")
 
         return points_within_range
 
@@ -103,20 +103,31 @@ def plot_voting(sim,r):
 
 def analyze_voting_thijs():
     
-    r = 1
-    sim = Sim()
-    simulate_voting(sim,r)
-    print(np.mean(sim.votes,axis=0))
-    #pretty_pic(sim,r)
-    unvoted_vote(sim,r)
-    #pretty_pic(sim,r)
-    print(np.mean(sim.votes,axis=0))
+    results = []
+    for i in range(100):
+        r = 50
+        sim = Sim()
+        simulate_voting(sim,r)
+        
+        #pretty_pic(sim,r)
+        unvoted_vote(sim,r)
+        #pretty_pic(sim,r)
+        mean_votes = np.mean(sim.votes,axis=0)
+        results.append(mean_votes[0])
+
+    fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
+
+    # We can set the number of bins with the *bins* keyword argument.
+    axs.hist(results, bins=25)
     
+
+    plt.show()
+            
 
 if __name__ == "__main__":
     
-    # analyze_voting_thijs()
-    # exit()
+    #analyze_voting_thijs()
+    #exit()
     r = 10
     sim = Sim()
 
