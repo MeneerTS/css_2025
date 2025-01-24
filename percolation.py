@@ -6,8 +6,9 @@ import numpy as np
 import copy
 
 class Sim:
-    def __init__(self):
-        self.herd_size = 100
+    def __init__(self,herd_size=100,num_voters=50):
+        assert num_voters <= herd_size
+        self.herd_size = herd_size
         self.herd = Herd(self.herd_size, [100, 100], 50)
         # This should create a herd of herd_size bisons
         assert len(self.herd.bisons) == self.herd_size
@@ -20,7 +21,7 @@ class Sim:
         # The number of voters should start at 0
         assert self.num_voted == 0
 
-        self.num_voters = 50
+        self.num_voters = num_voters
         # Only a total of herd_size bisons can vote
         assert self.num_voters <= self.herd_size
 
@@ -104,12 +105,15 @@ def plot_voting(sim,r):
 
 def r_analysis():
     total_results = []
-    for r_value in range(0,100,1):
+    num_r_values_to_test = 10
+    num_voters = 100
+    num_non_voters = 0
+    for r_value in range(0,100,100 // num_r_values_to_test):
         print(r_value)
         results = []
         for i in range(100):
             r = r_value
-            sim = Sim()
+            sim = Sim(num_voters + num_non_voters,num_voters)
             simulate_voting(sim,r)
             
             #pretty_pic(sim,r)
@@ -119,11 +123,11 @@ def r_analysis():
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
         total_results.append(np.mean(results))
     
-    np.save("numpy_files\\1000_r_plot",total_results)
+    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_r_{num_r_values_to_test}_r_plot",total_results)
     fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
 
     
-    axs.plot(np.arange(100),total_results)
+    axs.plot(np.arange(num_r_values_to_test),total_results)
     
 
     plt.show()
