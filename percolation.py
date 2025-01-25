@@ -73,8 +73,12 @@ def unvoted_vote(sim,points_within_range,use_random=True):
             #If there is a neighbour we look
             #At which has the most influence
             #and do that vote
-            influence = influence[0] > influence[1]
-            voting.random_vote_indexed(sim.herd, unvotedindex, influence)
+            if influence[0] == influence[1]:
+                #Do a random vote if our neighbours are divided
+                voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
+            else:
+                influence = influence[0] > influence[1]
+                voting.random_vote_indexed(sim.herd, unvotedindex, influence)
         elif use_random:
             #Otherwise do random
             voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
@@ -107,16 +111,12 @@ def plot_spheres_of_influence(sim,r):
     ax.set(xlim=[0, 200], ylim=[0, 200])
 
     colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
-    #circle = plt.Circle(sim.locations[0], r, fill=False)
-    #ax.add_patch(circle) 
+    
 
 
     points_within_range = sim.compute_neighbours(r)
 
-    # Create lines between points within range
-    #for i, neighbors in enumerate(points_within_range):
-    #    for j in neighbors:
-    #        ax.plot([sim.locations[i][0], sim.locations[j][0]], [sim.locations[i][1], sim.locations[j][1]], c="gray", alpha=1, zorder=0)
+    
     for locationid in range(sim.num_voters):
         circle = plt.Circle(sim.locations[locationid], r, fill=False)
         ax.add_patch(circle) 
@@ -125,14 +125,15 @@ def plot_spheres_of_influence(sim,r):
 
 def r_analysis():
     total_results = []
-    num_r_values_to_test = 100
+    num_r_values_to_test = 25
     num_voters = 100
-    num_non_voters = 0
+    num_non_voters = 1000
+    num_iterations_per_r = 50
     total_cows = num_voters + num_non_voters
     for r_value in range(0,100,100 // num_r_values_to_test):
         print(r_value)
         results = []
-        for i in range(500):
+        for i in range(num_iterations_per_r):
             r = r_value
             sim = Sim(total_cows,num_voters)
             points_within_range = simulate_voting(sim,r)
@@ -144,7 +145,7 @@ def r_analysis():
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
         total_results.append(np.mean(results))
     
-    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_r_{num_r_values_to_test}_r_plot2",total_results)
+    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values_to_test}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
     fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
 
     
@@ -152,11 +153,13 @@ def r_analysis():
     
 
     plt.show()
+
+
 def histogram_analysis():
     
     results = []
-    for i in range(100):
-        r = 50
+    for i in range(1000):
+        r = 25
         sim = Sim()
         points_within_range = simulate_voting(sim,r)
         
@@ -187,8 +190,8 @@ def voting_test():
 
 if __name__ == "__main__":
     
-    #analyze_voting_thijs()
     voting_test()
+    
     exit()
     r = 10
     sim = Sim()
