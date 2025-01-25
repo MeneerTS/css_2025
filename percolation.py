@@ -125,10 +125,11 @@ def plot_spheres_of_influence(sim,r):
 
 def r_analysis():
     total_results = []
-    num_r_values_to_test = 25
+    all_data = []
+    num_r_values_to_test = 10
     num_voters = 100
-    num_non_voters = 1000
-    num_iterations_per_r = 50
+    num_non_voters = 0
+    num_iterations_per_r = 500
     total_cows = num_voters + num_non_voters
     for r_value in range(0,100,100 // num_r_values_to_test):
         print(r_value)
@@ -144,12 +145,14 @@ def r_analysis():
             mean_votes = np.mean(sim.votes,axis=0)
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
         total_results.append(np.mean(results))
+        all_data.append(results)
     
     np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values_to_test}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
+    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values_to_test}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
     fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
 
     
-    axs.plot(np.arange(num_r_values_to_test),total_results)
+    axs.plot(np.arange(0,100,100//num_r_values_to_test),total_results)
     
 
     plt.show()
@@ -190,7 +193,7 @@ def voting_test():
 
 if __name__ == "__main__":
     
-    voting_test()
+    r_analysis()
     
     exit()
     r = 10
