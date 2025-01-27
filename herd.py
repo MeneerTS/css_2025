@@ -1,7 +1,79 @@
 import numpy as np
+
+class Bison:
+    """
+    A Bison is an animal that can vote.
+
+    Attributes:
+    position: np.array - the position of the bison
+    vote: np.array - the vote of the bison
+    """
+    def __init__(self, position: np.array, vote: np.array) -> None:
+        """
+        Initialize a Bison.
+
+        Parameters:
+        position: np.array - the position of the bison
+        vote: np.array - the vote of the bison
+        """
+
+        self.position = position
+        self.vote = vote
+
 class Herd:
-    # A Herd has a list of bisons
-    def __init__(self, count = 0, center = [100, 100], radius = 50):
+    """
+    A Herd is a collection of bisons.
+
+    Attributes:
+    bisons: list - a list of bisons
+
+    Methods:
+    add_bison: Bison -> None - add a bison to the herd
+    as_numpy: None -> np.array - return the locations and votes of the bisons in the herd
+    reset: int, list, float -> None - reset the herd to a new configuration
+    """
+
+    def __init__(self, count = 100, center = [100, 100], radius = 50) -> None:
+        """
+        Initialize a herd of bisons.
+
+        Parameters:
+        count: int - the number of bisons in the herd
+        center: list - the center of the herd
+        radius: float - the radius of the herd
+        """
+        self.reset(count, center, radius)
+
+
+    def add_bison(self, bison: Bison) -> None:
+        """
+        Add a bison to the herd.
+
+        Parameters:
+        bison: Bison - the bison to add to the herd
+        """
+        self.bisons.append(bison)
+
+
+    def as_numpy(self) -> tuple:
+        """Return the locations and votes of the bisons in the herd as 2 numpy arrays."""
+        locations = []
+        votes = []
+        for bison in self.bisons:
+            locations.append(list(bison.position))
+            votes.append(list(bison.vote))
+        return np.array(locations), np.array(votes)
+
+
+    def reset(self, count = 100, center = [100, 100], radius = 50) -> None:
+        """
+        Resets the herd of bisons to a new configuration.
+
+        Parameters:
+        count: int - the number of bisons in the herd
+        center: list - the center of the herd
+        radius: float - the radius of the herd
+        """
         self.bisons = []
         for _ in range(count):
             r = radius * np.sqrt(np.random.rand(count))
@@ -9,28 +81,8 @@ class Herd:
             x = center[0] + r * np.cos(theta)
             y = center[1] + r * np.sin(theta)
             positions = np.stack((x, y), axis=-1)
-            self.bisons = [Bison(pos, np.zeros(2)) for pos in positions]
+        self.bisons = [Bison(pos, np.zeros(2)) for pos in positions]
 
+        # The number of bisons should be equal to count
+        assert len(self.bisons) == count
 
-    def add_bison(self, bison):
-        #not necessary but convenient function
-        self.bisons.append(bison)
-    def as_numpy(self):
-        locations = []
-        directions = []
-        votes = []
-        for bison in self.bisons:
-            locations.append(list(bison.position))
-            # directions.append(list(bison.direction))
-            votes.append(list(bison.vote))
-        return np.array(locations), np.array(votes)
-
-class Bison:  
-    #bisons can have many properties!
-    #Perhaps these properties can be used in voting
-    #only position and direction are currently used in the simulation
-    def __init__(self,position, vote):
-        self.position = position
-        # self.direction = direction
-        self.vote = vote
-        #self.hunger, self.size etc etc...
