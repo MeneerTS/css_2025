@@ -3,10 +3,9 @@ from matplotlib.animation import FuncAnimation
 from herd import Herd
 import voting
 import numpy as np
-import copy
 
 class Sim:
-    def __init__(self,herd_size=100,num_voters=50):
+    def __init__(self, herd_size=100, num_voters=50):
         assert num_voters <= herd_size
         self.herd_size = herd_size
         self.herd = Herd(self.herd_size, [100, 100], 50)
@@ -28,64 +27,79 @@ class Sim:
 
 
     def compute_neighbours(self, r):
+        """
+        Compute the neighbours of each point within a radius r
+        r: float - the radius within which to look for neighbours
+        """
+
         # Compute pairwise distances
         pairwise_distances = np.linalg.norm(self.locations[:, np.newaxis] - self.locations, axis=2)
-        #print(pairwise_distances)
 
         # Find points within the range for each point
         points_within_range = [np.where((pairwise_distances[i] <= r) & (pairwise_distances[i] != 0))[0] for i in range(len(self.locations))]
-        #print(points_within_range)
-        # Display results
-        #for i, neighbors in enumerate(points_within_range):
-        #    print(f"Points within range of {i}: {neighbors}")
+
+        # Check that the number of points is the same as the number of locations
+        assert len(points_within_range) == len(self.locations)
 
         return points_within_range
 
-def simulate_voting(sim,r):
-    #simulates a voting cycle without making any pictures
+def simulate_voting(sim, r):
+    """
+    Simulate a voting cycle
+    sim: Sim - the simulation object
+    r: float - the radius within which to look for neighbours
+    """
     points_within_range = sim.compute_neighbours(r)
     while True:
         if sim.num_voted >= sim.num_voters:
             return points_within_range
         if sim.num_voted < sim.num_voters:
+
+            # Tally all local votes
             votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
+            # Compute the influence of the neighbours
             influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-            #print(influence)
             influence = (influence[0] - influence[1]) / 2
-            # influence = 0
+
+            # Influence should be between -0.5 and 0.5
             assert -0.5 <= influence <= 0.5
-                
+
             voting.random_vote_indexed(sim.herd, sim.num_voted, 0.5 + influence)
+
+            # Update variables
             sim.locations, sim.votes = sim.herd.as_numpy()
             sim.num_voted += 1
-def unvoted_vote(sim,points_within_range,use_random=True): 
-   
-    #The unvoted bizons go with the majority in their radius, or random if there are none (only when use_random is enabled, otherwise no vote is cast)
-    
-    
+
+
+def unvoted_vote(sim, points_within_range, use_random=True):
+    """
+    Simulate the unvoted bisons voting based on the votes of their neighbours,
+    or randomly if there are no neighbours when use_random is enabled, otherwise no vote is cast.
+    sim: Sim - the simulation object
+    points_within_range: list - the list of neighbours for each point
+    use_random: bool - whether to use random voting
+    """
     for unvotedindex in range(sim.num_voted,sim.herd_size):
         votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
         influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-        #print(influence)
-        #influence = (influence[0] - influence[1]) / 2
-        #assert -0.5 <= influence <= 0.5
+
         if len(votes_neighbours) > 0:
-            #If there is a neighbour we look
-            #At which has the most influence
-            #and do that vote
+            # Check if there is a majority in our neighbours
             if influence[0] == influence[1]:
-                #Do a random vote if our neighbours are divided
+                # Do a random vote if our neighbours are divided
                 voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
             else:
+                # Otherwise vote with the majority
                 influence = influence[0] > influence[1]
                 voting.random_vote_indexed(sim.herd, unvotedindex, influence)
         elif use_random:
-            #Otherwise do random
+            # If there are no neighbours and use_random is enabled, do a random vote
             voting.random_vote_indexed(sim.herd, unvotedindex, 0.5)
-    #update only at the end
-    sim.locations, sim.votes = sim.herd.as_numpy()  
-        
-def plot_voting(sim,r):
+
+    # Update variables
+    sim.locations, sim.votes = sim.herd.as_numpy()
+
+def plot_voting(sim, r):
     fig, axs = plt.subplots(1, 2)
     ax = axs[0]
     ax.set_aspect('equal')
@@ -102,7 +116,7 @@ def plot_voting(sim,r):
     scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
     plt.show()
 
-def plot_spheres_of_influence(sim,r):
+def plot_spheres_of_influence(sim, r):
     #plots circles around every voting cow
     #Even if the unvoting cows have voted through some other means!
     fig, axs = plt.subplots(1, 2)
@@ -126,19 +140,19 @@ def plot_spheres_of_influence(sim,r):
 def r_analysis():
     total_results = []
     all_data = []
-    num_r_values_to_test = 10
+    num_r_values = 10
     num_voters = 100
     num_non_voters = 0
     num_iterations_per_r = 500
     total_cows = num_voters + num_non_voters
-    for r_value in range(0,100,100 // num_r_values_to_test):
+    for r_value in range(0,100,100 // num_r_values):
         print(r_value)
         results = []
         for i in range(num_iterations_per_r):
             r = r_value
             sim = Sim(total_cows,num_voters)
             points_within_range = simulate_voting(sim,r)
-            
+
             #pretty_pic(sim,r)
             unvoted_vote(sim,points_within_range)
             #pretty_pic(sim,r)
@@ -146,14 +160,14 @@ def r_analysis():
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
         total_results.append(np.mean(results))
         all_data.append(results)
-    
-    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values_to_test}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
-    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values_to_test}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
+
+    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
+    np.save(f"numpy_files\\voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_{num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
     fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
 
-    
-    axs.plot(np.arange(0,100,100//num_r_values_to_test),total_results)
-    
+
+    axs.plot(np.arange(0,100,100//num_r_values),total_results)
+
 
     plt.show()
 
@@ -193,9 +207,9 @@ def voting_test():
 
 if __name__ == "__main__":
     
-    r_analysis()
+    # r_analysis()
     
-    exit()
+    # exit()
     r = 10
     sim = Sim()
 
