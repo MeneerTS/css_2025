@@ -41,6 +41,29 @@ def plot_non_voter_influence():
     # Show the plot
     plt.show()
 
+
+
+def weird_plot():
+    folder_name = "numpy_files\\"
+    values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_10_iterations_per_r_500_r_analysis_all_data.npy")
+    print(values.shape)  # Should print (10, 500)
+    
+    # Calculate probabilities
+    above_0_9 = (values > 0.9).mean(axis=1)  # Fraction of values > 0.9 for each row
+    below_0_1 = (values < 0.1).mean(axis=1)  # Fraction of values < 0.1 for each row
+    
+    # Plotting
+    x = range(1, values.shape[0] + 1)  # Row indices
+    plt.plot(x, above_0_9, label="P(Values > 0.9)", marker="o")
+    plt.plot(x, below_0_1, label="P(Values < 0.1)", marker="o")
+    
+    plt.xlabel("Experiment (Row Index)")
+    plt.ylabel("Probability")
+    plt.title("Probability of Values Being > 0.9 and < 0.1")
+    plt.legend()
+    plt.grid()
+    plt.show()
+
 def plot_r_analysis_with_standard_deviation():
     folder_name = "numpy_files\\"
     values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_10_iterations_per_r_500_r_analysis_all_data.npy")
@@ -73,7 +96,8 @@ def plot_r_analysis_with_standard_deviation():
     plt.show()
 
 if __name__ == '__main__':
-    plot_r_analysis_with_standard_deviation()
+    weird_plot()
+    #plot_r_analysis_with_standard_deviation()
 
 
 
