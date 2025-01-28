@@ -7,18 +7,16 @@ from scipy.stats import sem, t
 def plot_non_voter_influence():
     folder_name = "numpy_files\\"
     non_voters_0 = np.load(folder_name + "voters_100_non_voters_0_number_of_r_20_iterations_per_r_100_r_analysis_plot.npy")
-    non_voters_50 = np.load(folder_name + "voters_100_non_voters_50_number_of_r_20_iterations_per_r_100_r_analysis_plot.npy")
     non_voters_100 = np.load(folder_name + "voters_100_non_voters_100_number_of_r_20_iterations_per_r_100_r_analysis_plot.npy")
-    non_voters_500 = np.load(folder_name + "voters_100_non_voters_500_number_of_r_20_iterations_per_r_100_r_analysis_plot.npy")
     non_voters_1000 = np.load(folder_name + "voters_100_non_voters_1000_number_of_r_20_iterations_per_r_100_r_analysis_plot.npy")
     x = np.arange(0, 100, 5)
 
     plt.figure(figsize=(10, 6))  # Set figure size for better visibility
 
     # Plot each dataset with clear labels and distinguishable line styles
-    plt.plot(x, non_voters_0, label="Non-voters: 0", linestyle='-', color='#A7A6DA', marker='o')
-    plt.plot(x, non_voters_100, label="Non-voters: 100", linestyle='--', color='#D74967', marker='s')
-    plt.plot(x, non_voters_1000, label="Non-voters: 1000", linestyle='-.', color='#B384C0', marker='d')
+    plt.plot(x, non_voters_0, label="Non-voters: 0", linestyle='-', color='#1716FA', marker='o')
+    plt.plot(x, non_voters_100, label="Non-voters: 100", linestyle='--', color='#F71917', marker='s')
+    plt.plot(x, non_voters_1000, label="Non-voters: 1000", linestyle='-.', color='#A324F0', marker='d')
 
     # Add title and labels
     plt.title("Effect of Non-Voters on Agreement", fontsize=16)
@@ -37,9 +35,9 @@ def plot_non_voter_influence():
 
     # Adjust plot margins for better spacing
     plt.tight_layout()
-
     # Show the plot
     plt.show()
+
 
 
 
@@ -81,22 +79,48 @@ def plot_r_analysis_with_standard_deviation():
     plt.plot(range(1, values.shape[0] + 1), means, label="Mean", color='blue', marker='o')
 
     # Plot the IQR-based confidence intervals
-    plt.fill_between(range(1, values.shape[0] + 1), lower_bound, upper_bound, color='blue', alpha=0.3, label="IQR Confidence Interval")
+    plt.fill_between(range(1, values.shape[0] + 1), lower_bound, upper_bound, color='blue', alpha=0.3, label="50% Confidence Interval")
 
     print(means)
     print(lower_bound)
     print(upper_bound)
     # Adding labels and title
-    plt.xlabel("Experiment Number (n)")
-    plt.ylabel("Value")
-    plt.title("Mean and IQR-based Confidence Intervals for Experiments")
+    plt.xlabel("Vision radius r")
+    plt.ylabel("Voter Agreement")
+    plt.title("Influence of vision radius on democratic consensus")
     plt.legend()
-
     # Show the plot
     plt.show()
 
+def plot_r_analysis_clean_version(include_percolation_treshold=False)
+    folder_name = "numpy_files\\"
+    values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_10_iterations_per_r_500_r_analysis_all_data.npy")
+        
+        # Calculate the mean and IQR for each experiment (row)
+    means = np.mean(values, axis=1)
+    
+
+    # Create a plot
+    plt.figure(figsize=(10, 6))
+
+    # Plot the mean values
+    plt.plot(range(values.shape[0]), means, label="Mean", color='blue', marker='o')
+
+    # Adding labels and title
+    plt.xlabel("Vision radius r")
+    plt.ylabel("Voter Agreement")
+    plt.title("Influence of vision radius on democratic consensus")
+    plt.legend()
+    name = "r_analysis"
+    if include_percolation_treshold:
+        plt.axvline(x=10.66)
+        name += '_with_percolation_threshold'
+    # Show the plot
+    plt.show()
+
+
 if __name__ == '__main__':
-    weird_plot()
+    plot_non_voter_influence()
     #plot_r_analysis_with_standard_deviation()
 
 
