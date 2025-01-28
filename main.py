@@ -66,13 +66,14 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
     sim = Sim(total_cows, num_voters)
 
     for r_value in range(0, 100, 100//num_r_values):
-        print(r_value)
+        print(f"---\n{r_value}---\n")
         results = []
         sim.reset(total_cows, num_voters)
         for _ in range(num_iterations_per_r):
             r = r_value
             sim.reset(total_cows, num_voters)
-            points_within_range = voting.simulate_voting(sim,r)
+            points_within_range = voting.simulate_voting(sim, r, 0.1)
+            print(voting.get_majority(sim))
             voting.unvoted_vote(sim,points_within_range)
             mean_votes = np.mean(sim.votes,axis=0)
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
@@ -94,12 +95,12 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
     plt.show()
 
 
-def histogram_analysis(r: int) -> None:
+def histogram_analysis(r: float) -> None:
     """
     Show a histogram of the voting results after 1000 iterations for a given radius r.
 
     Parameters:
-    r: int - the radius within which to look for neighbours
+    r: float - the radius within which to look for neighbours
     """
     results = []
     for _ in range(1000):
@@ -115,12 +116,12 @@ def histogram_analysis(r: int) -> None:
     plt.show()
 
 
-def run_animation(r: int) -> None:
+def run_animation(r: float) -> None:
     """
     Run an animation of the voting process for a given radius r.
 
     Parameters:
-    r: int - the radius within which to look for neighbours
+    r: float - the radius within which to look for neighbours
     """
 
     sim = Sim()
@@ -131,6 +132,9 @@ def run_animation(r: int) -> None:
 
 
     points_within_range = sim.compute_neighbours(r)
+    print(points_within_range)
+    # Print avg number of neighbours
+    print(np.mean([len(neighbors) for neighbors in points_within_range]))
 
     # Create lines between points within range
     for i, neighbors in enumerate(points_within_range):
@@ -180,5 +184,6 @@ def run_animation(r: int) -> None:
 if __name__ == "__main__":
 
     # run_animation(10)
-    r_analysis(10, 100, 0, 10)
+    r_analysis(10, 100, 0, 50)
+    # histogram_analysis(15)
 

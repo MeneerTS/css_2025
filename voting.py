@@ -37,7 +37,7 @@ def random_vote_indexed(herd: Herd, i: int, p = 0.5) -> None:
     else:
         herd.bisons[i].vote = np.array([0, 1])
 
-def simulate_voting(sim: Sim, r: float) -> list:
+def simulate_voting(sim: Sim, r: float, pr) -> list:
     """
     Simulate a voting cycle
 
@@ -58,12 +58,15 @@ def simulate_voting(sim: Sim, r: float) -> list:
             votes_neighbours = [vote for vote in sim.votes[points_within_range[sim.num_voted]] if vote[0] == 1 or vote[1] == 1]
             # Compute the influence of the neighbours
             influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
-            influence = (influence[0] - influence[1]) / 2
+            influence = (influence[0] - influence[1])
+            influence = influence * min(1 - pr, pr)
 
-            # Influence should be between -0.5 and 0.5
-            assert -0.5 <= influence <= 0.5
 
-            random_vote_indexed(sim.herd, sim.num_voted, 0.5 + influence)
+            # Influence should be between -(1-pr) and (1-pr) since we are adding it to pr
+            assert -(1-pr) <= influence <= (1-pr)
+
+
+            random_vote_indexed(sim.herd, sim.num_voted, pr + influence)
 
             # Update variables
             sim.locations, sim.votes = sim.herd.as_numpy()
@@ -80,7 +83,7 @@ def unvoted_vote(sim: Sim, points_within_range: list, use_random=True) -> None:
     points_within_range: list - the list of neighbours for each point
     use_random: bool - whether to use random voting
     """
-    for unvotedindex in range(sim.num_voted,sim.herd_size):
+    for unvotedindex in range(sim.num_voted, sim.herd_size):
         votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
         influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
 
@@ -123,3 +126,18 @@ def choose_local_majority(sim: Sim, points_within_range: list) -> None:
 
     # Update variables
     sim.locations, sim.votes = sim.herd.as_numpy()
+
+def get_majority(sim: Sim) -> np.array:
+    """
+    Get the majority vote of the herd
+
+    Parameters:
+    sim: Sim - the simulation object
+
+    Returns:
+    np.array - the majority vote
+    """
+    votes = np.array([bison.vote for bison in sim.herd.bisons])
+    tally = np.sum(votes, axis=0)
+    return np.array([1, 0]) if tally[0] > tally[1] else np.array([0, 1])
+
