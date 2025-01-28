@@ -99,3 +99,27 @@ def unvoted_vote(sim: Sim, points_within_range: list, use_random=True) -> None:
 
     # Update variables
     sim.locations, sim.votes = sim.herd.as_numpy()
+
+def choose_local_majority(sim: Sim, points_within_range: list) -> None:
+    """
+    Do a round where every bison figures out where their local majority is going. They then change their vote to that.
+
+    Parameters:
+    sim: Sim - the simulation object
+    points_within_range: list - the list of neighbours for each point    
+    """
+
+    for unvotedindex in range(0,sim.herd_size):
+        votes_neighbours = [vote for vote in sim.votes[points_within_range[unvotedindex]] if vote[0] == 1 or vote[1] == 1]
+        influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
+
+        if len(votes_neighbours) > 0:
+            # Check if there is a majority in our neighbours
+            #If our neighbours are divided we stay with our original vote
+            if influence[0] != influence[1]:
+                influence = influence[0] > influence[1]
+                random_vote_indexed(sim.herd, unvotedindex, influence)
+        #If there are no neighbours we keep our vote
+
+    # Update variables
+    sim.locations, sim.votes = sim.herd.as_numpy()
