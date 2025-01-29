@@ -65,13 +65,16 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
     total_cows = num_voters + num_non_voters
     sim = Sim(total_cows, num_voters)
 
+    field_radius = 50*np.sqrt((total_cows)/100)
+    
+
     for r_value in range(0, 100, 100//num_r_values):
         print(f"---\n{r_value}---\n")
         results = []
-        sim.reset(total_cows, num_voters)
+        sim.reset(total_cows, num_voters, radius=field_radius)
         for _ in range(num_iterations_per_r):
             r = r_value
-            sim.reset(total_cows, num_voters)
+            sim.reset(total_cows, num_voters, radius=field_radius)
             points_within_range = voting.simulate_voting(sim, r, 0.5)
             # print(voting.get_majority(sim))
             voting.unvoted_vote(sim,points_within_range)
@@ -265,11 +268,13 @@ def run_animation(r: float) -> None:
     plt.show()
 
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
+    
+    #print(np.mean(results))
     # run_animation(10)
-    # r_analysis(10, 100, 0, 50)
+    r_analysis(10, 400, 0, 100)
     # histogram_analysis(15)
     # influence_analysis(20)
-    uninformed_analysis()
+    #uninformed_analysis()
 
