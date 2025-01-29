@@ -14,9 +14,9 @@ def plot_non_voter_influence():
     plt.figure(figsize=(10, 6))  # Set figure size for better visibility
 
     # Plot each dataset with clear labels and distinguishable line styles
-    plt.plot(x, non_voters_0, label="Non-voters: 0", linestyle='-', color='#1716FA', marker='o')
-    plt.plot(x, non_voters_100, label="Non-voters: 100", linestyle='--', color='#F71917', marker='s')
-    plt.plot(x, non_voters_1000, label="Non-voters: 1000", linestyle='-.', color='#A324F0', marker='d')
+    plt.plot(x, non_voters_0, label="Abstention rate: 0%", linestyle='-', color='#1716FA', marker='o')
+    plt.plot(x, non_voters_100, label="Abstention rate: 50%", linestyle='--', color='#F71917', marker='s')
+    plt.plot(x, non_voters_1000, label="Abstention rate: 90%", linestyle='-.', color='#A324F0', marker='d')
 
     # Add title and labels
     plt.title("Effect of Non-Voters on Agreement", fontsize=16)
@@ -24,8 +24,8 @@ def plot_non_voter_influence():
     plt.ylabel("Voter agreement", fontsize=14)
 
     # Set x and y axis limits
-    plt.xlim(-10, 110)
-    plt.ylim(0.0, 1.1)
+    plt.xlim(-3, 103)
+    plt.ylim(0.0, 1.03)
 
     # Add grid for readability
     plt.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
@@ -35,6 +35,7 @@ def plot_non_voter_influence():
 
     # Adjust plot margins for better spacing
     plt.tight_layout()
+    plt.savefig("non_voter_influence",dpi=400)
     # Show the plot
     plt.show()
 
@@ -63,8 +64,8 @@ def weird_plot():
     plt.show()
 
 def plot_r_analysis_with_standard_deviation():
-    folder_name = "numpy_files\\"
-    values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_10_iterations_per_r_500_r_analysis_all_data.npy")
+    folder_name = "results\\"
+    values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_            100_iterations_per_r_500_r_analysis_all_data.npy")
         
         # Calculate the mean and IQR for each experiment (row)
     means = np.mean(values, axis=1)
@@ -76,25 +77,38 @@ def plot_r_analysis_with_standard_deviation():
     plt.figure(figsize=(10, 6))
 
     # Plot the mean values
-    plt.plot(range(1, values.shape[0] + 1), means, label="Mean", color='blue', marker='o')
+    plt.plot(range(0,100,100//values.shape[0]), means, label="Mean", color='blue')
 
     # Plot the IQR-based confidence intervals
-    plt.fill_between(range(1, values.shape[0] + 1), lower_bound, upper_bound, color='blue', alpha=0.3, label="50% Confidence Interval")
+    plt.fill_between(range(0,100,100//values.shape[0]), lower_bound, upper_bound, color='blue', alpha=0.3, label="50% Confidence Interval")
 
     print(means)
     print(lower_bound)
     print(upper_bound)
     # Adding labels and title
-    plt.xlabel("Vision radius r")
-    plt.ylabel("Voter Agreement")
-    plt.title("Influence of vision radius on democratic consensus")
-    plt.legend()
+    plt.xlim(-3, 103)
+    plt.ylim(0.0, 1.03)
+
+    # Add grid for readability
+    plt.grid(True, which='both', linestyle='--', linewidth=0.9, alpha=0.7)
+
+    # Add legend
+    
+
+    # Adjust plot margins for better spacing
+    
+    plt.xlabel("Vision radius r", fontsize=14)
+    plt.ylabel("Voter Agreement", fontsize=14)
+    plt.title("Effect of Vision Radius on Voter Agreement", fontsize=16)
+    plt.legend(title="Legend", fontsize=12, loc='upper left')
+    plt.tight_layout()
+    plt.savefig("r_analysis_with_confidence",dpi=400)
     # Show the plot
     plt.show()
 
-def plot_r_analysis_clean_version(include_percolation_treshold=False)
-    folder_name = "numpy_files\\"
-    values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_10_iterations_per_r_500_r_analysis_all_data.npy")
+def plot_r_analysis_clean_version(include_percolation_treshold=False):
+    folder_name = "results\\"
+    values = np.load(folder_name + "voters_100_non_voters_0_number_of_r_            100_iterations_per_r_500_r_analysis_all_data.npy")
         
         # Calculate the mean and IQR for each experiment (row)
     means = np.mean(values, axis=1)
@@ -104,24 +118,50 @@ def plot_r_analysis_clean_version(include_percolation_treshold=False)
     plt.figure(figsize=(10, 6))
 
     # Plot the mean values
-    plt.plot(range(values.shape[0]), means, label="Mean", color='blue', marker='o')
+    plt.plot(range(0,100,100//values.shape[0]), means, label="Mean", color='blue')
 
     # Adding labels and title
     plt.xlabel("Vision radius r")
     plt.ylabel("Voter Agreement")
-    plt.title("Influence of vision radius on democratic consensus")
+   
     plt.legend()
+
+    # Add title and labels
+    plt.title("Effect of Vision Radius on Voter Agreement", fontsize=16)
+    plt.xlabel("Vision radius r", fontsize=14)
+    plt.ylabel("Voter agreement", fontsize=14)
+
+    # Set x and y axis limits
+    plt.xlim(-3, 103)
+    plt.ylim(0.0, 1.03)
+
+    # Add grid for readability
+    plt.grid(True, which='both', linestyle='--', linewidth=0.9, alpha=0.7)
+
+    # Add legend
+    
+
+    # Adjust plot margins for better spacing
+    plt.tight_layout()
+
+
     name = "r_analysis"
     if include_percolation_treshold:
-        plt.axvline(x=10.66)
+        plt.axvline(x=10.66,label='Percolation Threshold',linestyle='--',color='red')
         name += '_with_percolation_threshold'
+
+
+    plt.legend(title="Legend", fontsize=12, loc='upper left')
+    plt.savefig(name,dpi=400)
     # Show the plot
     plt.show()
 
 
 if __name__ == '__main__':
+    plot_r_analysis_clean_version(include_percolation_treshold=True)
+    plot_r_analysis_clean_version(include_percolation_treshold=False)
     plot_non_voter_influence()
-    #plot_r_analysis_with_standard_deviation()
+    plot_r_analysis_with_standard_deviation()
 
 
 
