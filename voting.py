@@ -37,13 +37,14 @@ def random_vote_indexed(herd: Herd, i: int, p = 0.5) -> None:
     else:
         herd.bisons[i].vote = np.array([0, 1])
 
-def simulate_voting(sim: Sim, r: float, pr) -> list:
+def simulate_voting(sim: Sim, r: float, pb) -> list:
     """
     Simulate a voting cycle
 
     Parameters:
     sim: Sim - the simulation object
     r: float - the radius within which to look for neighbours
+    pb: float - the probability of voting for [1, 0] (Blue)
 
     Returns:
     points_within_range: list - a list of neighbours for each point for future use
@@ -59,14 +60,14 @@ def simulate_voting(sim: Sim, r: float, pr) -> list:
             # Compute the influence of the neighbours
             influence = np.mean(votes_neighbours, axis=0) if len(votes_neighbours) > 0 else np.array([0, 0])
             influence = (influence[0] - influence[1])
-            influence = influence * min(1 - pr, pr)
+            influence = influence * min(1 - pb, pb)
 
 
             # Influence should be between -(1-pr) and (1-pr) since we are adding it to pr
-            assert -(1-pr) <= influence <= (1-pr)
+            assert -(1-pb) <= influence <= (1-pb)
 
 
-            random_vote_indexed(sim.herd, sim.num_voted, pr + influence)
+            random_vote_indexed(sim.herd, sim.num_voted, pb + influence)
 
             # Update variables
             sim.locations, sim.votes = sim.herd.as_numpy()
@@ -116,5 +117,8 @@ def get_majority(sim: Sim) -> np.array:
     """
     votes = np.array([bison.vote for bison in sim.herd.bisons])
     tally = np.sum(votes, axis=0)
-    return np.array([1, 0]) if tally[0] > tally[1] else np.array([0, 1])
-
+    if tally[0] > tally[1]:
+        return np.array([1, 0])
+    if tally[0] < tally[1]:
+        return np.array([0, 1])
+    return np.array([0, 0])

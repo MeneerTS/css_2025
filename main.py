@@ -72,8 +72,8 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
         for _ in range(num_iterations_per_r):
             r = r_value
             sim.reset(total_cows, num_voters)
-            points_within_range = voting.simulate_voting(sim, r, 0.1)
-            print(voting.get_majority(sim))
+            points_within_range = voting.simulate_voting(sim, r, 0.5)
+            # print(voting.get_majority(sim))
             voting.unvoted_vote(sim,points_within_range)
             mean_votes = np.mean(sim.votes,axis=0)
             results.append(np.abs(mean_votes[0] - mean_votes[1]))
@@ -114,6 +114,90 @@ def histogram_analysis(r: float) -> None:
     axs.hist(results, bins=25)
 
     plt.show()
+
+
+def influence_analysis(steps: int) -> None:
+
+    total_results_r = []
+    sim = Sim(100, 100)
+    for r in [0, 25, 50, 75, 100]:
+        total_results = []
+        all_data = []
+        sim.reset(100, 100)
+        for pb_value in np.linspace(0.4, 0.6, steps):
+            results = []
+            sim.reset(100, 100)
+            print(f"r: {r}, pb: {pb_value}")
+            for _ in range(1000):
+                sim.reset(100, 100)
+                points_within_range = voting.simulate_voting(sim, r, pb_value)
+                voting.unvoted_vote(sim, points_within_range)
+                results.append(1 if (np.array_equal(voting.get_majority(sim), np.array([1, 0]))) else 0)
+            total_results.append(np.mean(results))
+            all_data.append(results)
+
+        # Check that the number of results is correct
+        assert len(total_results) == steps
+
+        # Save data to numpy files
+        np.save(f"results/r_{r}_steps_{steps}_influence_analysis_plot", total_results)
+        np.save(f"results/r_{r}_steps_{steps}_influence_analysis_all_data", all_data)
+        total_results_r.append(total_results)
+
+    _, ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
+    for total_results in total_results_r:
+        ax.plot(np.linspace(0.4, 0.6, steps), total_results)
+    ax.legend(["r = 0", "r = 25", "r = 50", "r = 75", "r = 100"])
+    ax.set_xlabel("Bias of voting blue")
+    ax.set_ylabel("Percentage of times majority is blue")
+
+    plt.show()
+
+
+def uninformed_analysis() -> None:
+    total_results_r = []
+    sim = Sim(100, 100)
+    for r in [10, 12, 14, 16, 18, 20]:
+        total_results = []
+        all_data = []
+        sim.reset(100, 100)
+        for num_nonvoters in np.linspace(0, 100, 21):
+            results = []
+            # sim.reset(100, 100)
+            print(f"r: {r}, num_nonvoters: {num_nonvoters}")
+            for _ in range(1000):
+                sim.reset(100, num_nonvoters)
+                points_within_range = voting.simulate_voting(sim, r, 0.5)
+                first_majority = voting.get_majority(sim)
+                if first_majority[0] == 0 and first_majority[1] == 0:
+                    results.append(0.5)
+                    continue
+                voting.unvoted_vote(sim, points_within_range, num_nonvoters)
+                majority = voting.get_majority(sim)
+                if np.array_equal(first_majority, majority):
+                    results.append(1)
+                else:
+                    results.append(0)
+            total_results.append(np.mean(results))
+            all_data.append(results)
+        
+        # Check that the number of results is correct
+        assert len(total_results) == 21
+    
+        # Save data to numpy files
+        np.save(f"results/r_{r}_uninformed_analysis_plot", total_results)
+        np.save(f"results/r_{r}_uninformed_analysis_all_data", all_data)
+        total_results_r.append(total_results)
+
+    _, ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
+    for total_results in total_results_r:
+        ax.plot(np.linspace(0, 100, 21), total_results)
+    ax.legend(["r = 10", "r = 12", "r = 14", "r = 16", "r = 18", "r = 20"])
+    ax.set_xlabel("Number of non-voters")
+    ax.set_ylabel("Percentage of times majority is blue")
+
+    plt.show()
+
 
 
 def run_animation(r: float) -> None:
@@ -184,6 +268,8 @@ def run_animation(r: float) -> None:
 if __name__ == "__main__":
 
     # run_animation(10)
-    r_analysis(10, 100, 0, 50)
+    # r_analysis(10, 100, 0, 50)
     # histogram_analysis(15)
+    # influence_analysis(20)
+    uninformed_analysis()
 
