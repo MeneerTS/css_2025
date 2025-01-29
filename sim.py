@@ -20,6 +20,8 @@ class Sim:
     def __init__(self, herd_size=100, num_voters=50) -> None:
         assert num_voters <= herd_size
         self.herd_size = herd_size
+        
+
         self.herd = Herd(self.herd_size, [100, 100], 50)
         # This should create a herd of herd_size bisons
         assert len(self.herd.bisons) == self.herd_size
@@ -37,8 +39,8 @@ class Sim:
         assert self.num_voters <= self.herd_size
 
 
-    def reset(self, herd_size=100, num_voters=50) -> None:
-        self.herd.reset(herd_size)
+    def reset(self, herd_size=100, num_voters=50, radius=50) -> None:
+        self.herd.reset(herd_size,radius=radius)
         # This should reset to a herd of herd_size bisons
         assert len(self.herd.bisons) == self.herd_size
 
