@@ -20,7 +20,7 @@ def plot_non_voter_influence():
 
     # Add title and labels
     plt.title("Effect of Non-Voters on Agreement", fontsize=16)
-    plt.xlabel("Neighbour radius r", fontsize=14)
+    plt.xlabel("Vision radius r", fontsize=14)
     plt.ylabel("Voter agreement", fontsize=14)
 
     # Set x and y axis limits
@@ -121,8 +121,6 @@ def plot_r_analysis_clean_version(include_percolation_treshold=False):
     plt.plot(range(0,100,100//values.shape[0]), means, label="Mean", color='blue')
 
     # Adding labels and title
-    plt.xlabel("Vision radius r")
-    plt.ylabel("Voter Agreement")
    
     plt.legend()
 
