@@ -73,7 +73,7 @@ class Herd:
         #The count stays the same
         newpositions = self.generate_positions(len(self.bisons),center,radius)
         
-        for i, bison in enumerate(self.bizons):
+        for i, bison in enumerate(self.bisons):
             bison.position = newpositions[i]
 
     def generate_positions(self, count,center,radius) -> list:
