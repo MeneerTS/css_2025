@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.colors
 from matplotlib.animation import FuncAnimation
 from sim import Sim
 import voting
@@ -100,12 +101,59 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
 
         x = np.arange(0, 100, 100//num_r_values)
         ax.plot(x, total_results)
-        ax.set_xlabel("Radius")
-        ax.set_ylabel("Difference in votes")
-        ax.grid()
+        ax.set_xlabel("Vision range")
+        ax.set_ylabel("Voter agreement")
+        ax.grid(True)
+
+    # , ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
+    for iterations in [1, 2, 4]:
+        total_results = []
+        all_data = []
+
+        total_cows = num_voters + num_non_voters
+        sim = Sim(total_cows, num_voters)
+
+        field_radius = 50*np.sqrt(total_cows/100)
+
+        for r_value in range(0, 100, 100//num_r_values):
+            print(f"---\n{r_value}---\n")
+            results = []
+            sim.reset(total_cows, num_voters, field_radius)
+            for _ in range(num_iterations_per_r):
+                r = r_value
+                sim.reset(total_cows, num_voters, field_radius)
+                points_within_range = voting.simulate_voting(sim, r, 0.5)
+                # print(voting.get_majority(sim))
+                voting.unvoted_vote(sim,points_within_range)
+                for i in range(iterations):
+                    #randomize
+                    sim.randomize_positions()
+                    points_within_range = sim.compute_neighbours(r)
+                    voting.choose_local_majority(sim, points_within_range)
+                mean_votes = np.mean(sim.votes,axis=0)
+                results.append(np.abs(mean_votes[0] - mean_votes[1]))
+            total_results.append(np.mean(results))
+            all_data.append(results)
+
+        # Check that the number of results is correct
+        assert len(total_results) == num_r_values
+
+        # Save data to numpy files
+        # np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
+                # {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
+        # np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
+                # {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
+
+        if iterations == 1:
+            ax.plot(x, total_results, linestyle="--", c="C1")
+        # ax.plot(np.arange(0, 100, 100//num_r_values), total_results, linestyle="--")
+        if iterations == 2:
+            ax.plot(x, total_results, linestyle="--", c="C2")
+        if iterations == 4:
+            ax.plot(x, total_results, linestyle="--", c="C3")
 
 
-    ax.legend(["0 iterations", "1 iteration", "2 iterations", "4 iterations"])
+    ax.legend(["0 iterations", "1 iteration", "2 iterations", "4 iterations", "1 iteration random", "2 iterations random", "4 iterations random"])
     plt.show()
 
 
@@ -466,7 +514,7 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    run_animation(15)
+    run_animation(18)
     # iteration_analysis(100, 100)
-    # r_analysis(10, 100, 0, 100)
+    # r_analysis(50, 100, 0, 250)
     # calculate_baseline(1000, 25)
