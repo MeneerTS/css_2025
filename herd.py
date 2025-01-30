@@ -71,10 +71,10 @@ class Herd:
         radius: float - the radius of the herd
         """
         #The count stays the same
-        newpositions = self.generate_positions(len(self.bizons),center,radius)
+        newpositions = self.generate_positions(len(self.bisons),center,radius)
         
-        for i, bizon in enumerate(self.bizons):
-            bizon.position = newpositions[i]
+        for i, bison in enumerate(self.bizons):
+            bison.position = newpositions[i]
 
     def generate_positions(self, count,center,radius) -> list:
         """
