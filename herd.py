@@ -64,7 +64,35 @@ class Herd:
             votes.append(list(bison.vote))
         return np.array(locations), np.array(votes)
 
+    def randomize_positions(self,center,radius) -> None:
+        """
+        Randomizes all positions while keeping votes etc the same
+        center: list - the center of the herd
+        radius: float - the radius of the herd
+        """
+        #The count stays the same
+        newpositions = self.generate_positions(len(self.bizons),center,radius)
+        
+        for i, bizon in enumerate(self.bizons):
+            bizon.position = newpositions[i]
 
+    def generate_positions(self, count,center,radius) -> list:
+        """
+        Generates a count sized list of (x,y) positions uniformly distributed in 
+        a circle of radius radius centered on center
+
+        count: int - the number of positions
+        center: list - the center of the circle
+        radius: float - the radius of the circle
+        """
+
+        for _ in range(count):
+            r = radius * np.sqrt(np.random.rand(count))
+            theta = 2 * np.pi * np.random.rand(count)
+            x = center[0] + r * np.cos(theta)
+            y = center[1] + r * np.sin(theta)
+            positions = np.stack((x, y), axis=-1)
+        return positions
     def reset(self, count = 100, center = [100, 100], radius = 50) -> None:
         """
         Resets the herd of bisons to a new configuration.
@@ -75,12 +103,7 @@ class Herd:
         radius: float - the radius of the herd
         """
         self.bisons = []
-        for _ in range(count):
-            r = radius * np.sqrt(np.random.rand(count))
-            theta = 2 * np.pi * np.random.rand(count)
-            x = center[0] + r * np.cos(theta)
-            y = center[1] + r * np.sin(theta)
-            positions = np.stack((x, y), axis=-1)
+        positions = self.generate_positions(count,center,radius)
         self.bisons = [Bison(pos, np.zeros(2)) for pos in positions]
 
         # The number of bisons should be equal to count
