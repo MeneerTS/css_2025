@@ -18,9 +18,11 @@ def plot_voting(sim: Sim, show = True) -> tuple:
     """
     fig, ax = plt.subplots(1, 1)
     ax.set_aspect('equal')
-    ax.set(xlim=[0, 200], ylim=[0, 200])
+    ax.set(xlim=[25, 175], ylim=[25, 175])
+    ax.set_xticks([])
+    ax.set_yticks([])
     colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
-    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=5, zorder=1)
+    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=30, zorder=1)
     if show:
         plt.show()
     return fig, ax, scat
@@ -96,7 +98,12 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
         np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
                 {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
 
-        ax.plot(np.arange(0, 100, 100//num_r_values), total_results)
+        x = np.arange(0, 100, 100//num_r_values)
+        ax.plot(x, total_results)
+        ax.set_xlabel("Radius")
+        ax.set_ylabel("Difference in votes")
+        ax.grid()
+
 
     ax.legend(["0 iterations", "1 iteration", "2 iterations", "4 iterations"])
     plt.show()
@@ -269,9 +276,10 @@ def run_animation(r: float) -> None:
     r: float - the radius within which to look for neighbours
     """
 
-    sim = Sim()
+    sim = Sim(50, 40)
 
     fig, ax, scat = plot_voting(sim, False)
+    fig.patch.set_facecolor('#D2B48C')
     circle = plt.Circle(sim.locations[0], r, fill=False)
     ax.add_patch(circle)
 
@@ -286,7 +294,7 @@ def run_animation(r: float) -> None:
         for j in neighbors:
             ax.plot([sim.locations[i][0], sim.locations[j][0]],
                     [sim.locations[i][1], sim.locations[j][1]],
-                    c="gray", alpha=1, zorder=0)
+                    c="gray", alpha=0.2, zorder=0)
 
     def update(_):
         if sim.num_voted == sim.num_voters:
@@ -327,6 +335,8 @@ def run_animation(r: float) -> None:
 
 def calculate_baseline(num_iterations_per_r, num_r_values):
         sim = Sim(100, 100)
+        total_results = []
+        all_data = []
         for r_value in range(0, 100, 100//num_r_values):
             print(f"---\n{r_value}---\n")
             results = []
@@ -336,17 +346,41 @@ def calculate_baseline(num_iterations_per_r, num_r_values):
                 sim.reset(100, 100)
                 points_within_range = voting.simulate_voting(sim, r, 0.5)
                 real_majority = voting.get_majority(sim)
-                if np.array_equal(majority, np.array([1, 0])):
-                    results.append(1)
-                elif np.array_equal(majority, np.array([0, 1])):
+                for i in range(len(sim.votes)):
+                    votes_neighbours = [vote for vote in sim.votes[points_within_range[i]] if vote[0] == 1 or vote[1] == 1]
+                    # votes_neighbours.append(sim.votes[i])
+                if len(votes_neighbours) == 0:
                     results.append(0)
+                    continue
+                    # print(votes_neighbours)
+                tally = np.sum(votes_neighbours, axis=0)
+                    # print(tally)
+                if tally[0] > tally[1]:
+                    local_vote = np.array([1, 0])
+                elif tally[0] < tally[1]:
+                    local_vote = np.array([0, 1])
                 else:
-                    results.append(0.5)
+                    local_vote = np.array([0, 0])
+                if np.array_equal(local_vote, real_majority):
+                    results.append(1)
+                else:
+                    results.append(0)
+
+
             total_results.append(np.mean(results))
             all_data.append(results)
 
         # Check that the number of results is correct
         assert len(total_results) == num_r_values
+
+        # Save data to numpy files
+        np.save(f"results/baseline_notself_{num_r_values}", total_results)
+        np.save(f"results/baseline_notself_all_data_{num_r_values}", all_data)
+        
+        _, ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
+        ax.plot(np.arange(0, 100, 100//num_r_values), total_results)
+        plt.show()
+
 
 def randomize_positions_test(num_r_values: int, num_voters: int, num_non_voters: int, num_iterations_per_r: int) -> None:
     """
@@ -432,6 +466,7 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    # run_animation(15)
+    run_animation(15)
     # iteration_analysis(100, 100)
-    r_analysis(10, 100, 0, 100)
+    # r_analysis(10, 100, 0, 100)
+    # calculate_baseline(1000, 25)
