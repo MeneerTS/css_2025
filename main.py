@@ -3,6 +3,7 @@ from matplotlib.animation import FuncAnimation
 from sim import Sim
 import voting
 import numpy as np
+import argparse
 
 def plot_voting(sim: Sim, show = True) -> tuple:
     """
@@ -59,39 +60,43 @@ def r_analysis(num_r_values: int, num_voters: int, num_non_voters: int, num_iter
     num_iterations_per_r: int - the number of iterations per r
 
     """
-    total_results = []
-    all_data = []
-
-    total_cows = num_voters + num_non_voters
-    sim = Sim(total_cows, num_voters)
-
-    for r_value in range(0, 100, 100//num_r_values):
-        print(f"---\n{r_value}---\n")
-        results = []
-        sim.reset(total_cows, num_voters)
-        for _ in range(num_iterations_per_r):
-            r = r_value
-            sim.reset(total_cows, num_voters)
-            points_within_range = voting.simulate_voting(sim, r, 0.5)
-            # print(voting.get_majority(sim))
-            voting.unvoted_vote(sim,points_within_range)
-            mean_votes = np.mean(sim.votes,axis=0)
-            results.append(np.abs(mean_votes[0] - mean_votes[1]))
-        total_results.append(np.mean(results))
-        all_data.append(results)
-
-    # Check that the number of results is correct
-    assert len(total_results) == num_r_values
-
-    # Save data to numpy files
-    np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
-            {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
-    np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
-            {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
-
     _, ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
-    ax.plot(np.arange(0, 100, 100//num_r_values), total_results)
+    for iterations in [0, 1, 2, 4]:
+        total_results = []
+        all_data = []
 
+        total_cows = num_voters + num_non_voters
+        sim = Sim(total_cows, num_voters)
+
+        for r_value in range(0, 100, 100//num_r_values):
+            print(f"---\n{r_value}---\n")
+            results = []
+            sim.reset(total_cows, num_voters)
+            for _ in range(num_iterations_per_r):
+                r = r_value
+                sim.reset(total_cows, num_voters)
+                points_within_range = voting.simulate_voting(sim, r, 0.5)
+                # print(voting.get_majority(sim))
+                voting.unvoted_vote(sim,points_within_range)
+                for i in range(iterations):
+                    voting.choose_local_majority(sim, points_within_range)
+                mean_votes = np.mean(sim.votes,axis=0)
+                results.append(np.abs(mean_votes[0] - mean_votes[1]))
+            total_results.append(np.mean(results))
+            all_data.append(results)
+
+        # Check that the number of results is correct
+        assert len(total_results) == num_r_values
+
+        # Save data to numpy files
+        np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
+                {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
+        np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
+                {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
+
+        ax.plot(np.arange(0, 100, 100//num_r_values), total_results)
+
+    ax.legend(["0 iterations", "1 iteration", "2 iterations", "4 iterations"])
     plt.show()
 
 
@@ -198,6 +203,60 @@ def uninformed_analysis() -> None:
 
     plt.show()
 
+def iteration_analysis(num_voters:int, num_non_voters:int) -> None:
+
+    total_cows = num_voters + num_non_voters
+    sim = Sim(total_cows, num_voters)
+    r_data = []
+
+    _, ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
+    for r_value in [10, 20]:
+        print(f"---\n{r_value}---\n")
+        
+        sim.reset(total_cows, num_voters)
+        run_values = []
+        for _ in range(100):
+
+            r = r_value
+            sim.reset(total_cows, num_voters)
+            results = []
+
+
+            points_within_range = voting.simulate_voting(sim, r, 0.5)
+            voting.unvoted_vote(sim,points_within_range)
+
+            mean_votes = np.mean(sim.votes,axis=0)
+            print(mean_votes)
+            results.append(np.abs(mean_votes[0] - mean_votes[1]))
+
+            for i in range(10):
+                voting.choose_local_majority(sim, points_within_range)
+                mean_votes = np.mean(sim.votes,axis=0)
+                # print(mean_votes)
+                results.append(np.abs(mean_votes[0] - mean_votes[1]))
+            run_values.append(results)
+            if r == 10:
+                ax.plot(np.arange(0, 11), results, c="blue", alpha=0.1)
+            if r == 20:
+                ax.plot(np.arange(0, 11), results, c="orange", alpha=0.1)
+
+        # Save data to numpy files
+        np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_r_{r_value}_iteration_analysis_plot", np.mean(run_values,axis=0))
+        np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_r_{r_value}_iteration_analysis_all_data", run_values)
+
+        r_data.append(np.mean(run_values,axis=0))
+        print(np.array(r_data).shape)
+
+    for r in r_data:
+        print(np.array(r).shape)
+        print(r)
+        ax.plot(np.arange(0, 11), r.squeeze())
+
+    # ax.legend(["r = 10", "r = 20", "r = 30", "r = 40", "r = 50"])
+    ax.grid()
+    plt.show()
+
+
 
 
 def run_animation(r: float) -> None:
@@ -264,12 +323,57 @@ def run_animation(r: float) -> None:
 
     plt.show()
 
+def calculate_baseline(num_iterations_per_r, num_r_values):
+        sim = Sim(100, 100)
+        for r_value in range(0, 100, 100//num_r_values):
+            print(f"---\n{r_value}---\n")
+            results = []
+            sim.reset(100, 100)
+            for _ in range(num_iterations_per_r):
+                r = r_value
+                sim.reset(100, 100)
+                points_within_range = voting.simulate_voting(sim, r, 0.5)
+                real_majority = voting.get_majority(sim)
+                if np.array_equal(majority, np.array([1, 0])):
+                    results.append(1)
+                elif np.array_equal(majority, np.array([0, 1])):
+                    results.append(0)
+                else:
+                    results.append(0.5)
+            total_results.append(np.mean(results))
+            all_data.append(results)
+
+        # Check that the number of results is correct
+        assert len(total_results) == num_r_values
+
+def main():
+    parser = argparse.ArgumentParser(description="Run analysis functions.")
+
+    parser.add_argument("--run_animation", type=int, help="Run animation with given number of frames")
+    parser.add_argument("--r_analysis", nargs=4, type=int, help="Run vision range analysis", metavar=("a", "b", "c", "d"))
+    parser.add_argument("--histogram_analysis", type=int, help="Run histogram analysis with given number of bins")
+    parser.add_argument("--influence_analysis", type=int, help="Run influence analysis with given steps")
+    parser.add_argument("--uninformed_analysis", action="store_true", help="Run uninformed analysis")
+
+    args = parser.parse_args()
+
+    if any(vars(args).values()):
+        if args.run_animation is not None:
+            run_animation(args.run_animation)
+        if args.r_analysis is not None:
+            r_analysis(*args.r_analysis)
+        if args.histogram_analysis is not None:
+            histogram_analysis(args.histogram_analysis)
+        if args.influence_analysis is not None:
+            influence_analysis(args.influence_analysis)
+        if args.uninformed_analysis:
+            uninformed_analysis()
+    else:
+        print("No arguments provided. Use --help for options.")
+
 
 if __name__ == "__main__":
-
-    # run_animation(10)
-    # r_analysis(10, 100, 0, 50)
-    # histogram_analysis(15)
-    # influence_analysis(20)
-    uninformed_analysis()
-
+    # main()
+    # run_animation(15)
+    # iteration_analysis(100, 100)
+    r_analysis(10, 100, 0, 100)

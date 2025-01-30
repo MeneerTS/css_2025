@@ -65,7 +65,7 @@ def simulate_voting(sim: Sim, r: float, pb) -> list:
 
             # Influence should be between -(1-pr) and (1-pr) since we are adding it to pr
             assert -(1-pb) <= influence <= (1-pb)
-
+            # influence = 0
 
             random_vote_indexed(sim.herd, sim.num_voted, pb + influence)
 
