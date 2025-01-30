@@ -348,6 +348,62 @@ def calculate_baseline(num_iterations_per_r, num_r_values):
         # Check that the number of results is correct
         assert len(total_results) == num_r_values
 
+def randomize_positions_test(num_r_values: int, num_voters: int, num_non_voters: int, num_iterations_per_r: int) -> None:
+    """
+    Analyze the effect of the radius r on the voting outcome when positions are randomized.
+
+    Parameters:
+    num_r_values: int - the number of r values to analyze
+    num_voters: int - the number of voters
+    num_non_voters: int - the number of non-voters
+    num_iterations_per_r: int - the number of iterations per r
+
+    """
+    _, ax = plt.subplots(1, 1, sharey=True, tight_layout=True)
+    for iterations in [0, 1, 2, 4]:
+        total_results = []
+        all_data = []
+
+        total_cows = num_voters + num_non_voters
+        sim = Sim(total_cows, num_voters)
+
+        field_radius = 50*np.sqrt(total_cows/100)
+
+        for r_value in range(0, 100, 100//num_r_values):
+            print(f"---\n{r_value}---\n")
+            results = []
+            sim.reset(total_cows, num_voters, field_radius)
+            for _ in range(num_iterations_per_r):
+                r = r_value
+                sim.reset(total_cows, num_voters, field_radius)
+                points_within_range = voting.simulate_voting(sim, r, 0.5)
+                # print(voting.get_majority(sim))
+                voting.unvoted_vote(sim,points_within_range)
+                for i in range(iterations):
+                    #randomize
+                    sim.randomize_positions()
+                    points_within_range = sim.compute_neighbours(r)
+                    voting.choose_local_majority(sim, points_within_range)
+                mean_votes = np.mean(sim.votes,axis=0)
+                results.append(np.abs(mean_votes[0] - mean_votes[1]))
+            total_results.append(np.mean(results))
+            all_data.append(results)
+
+        # Check that the number of results is correct
+        assert len(total_results) == num_r_values
+
+        # Save data to numpy files
+        np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
+                {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_plot",total_results)
+        np.save(f"results/voters_{num_voters}_non_voters_{num_non_voters}_number_of_r_\
+                {num_r_values}_iterations_per_r_{num_iterations_per_r}_r_analysis_all_data",all_data)
+
+        ax.plot(np.arange(0, 100, 100//num_r_values), total_results)
+
+    ax.legend(["0 iterations", "1 iteration", "2 iterations", "4 iterations"])
+    plt.show()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run analysis functions.")
 
