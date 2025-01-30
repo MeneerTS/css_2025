@@ -38,6 +38,12 @@ class Sim:
         # Only a total of herd_size bisons can vote
         assert self.num_voters <= self.herd_size
 
+    def randomize_positions(self) -> None:
+        """
+        Randomizes the herds positions and updates our understanding of the locations
+        """
+        self.herd.randomize_positions([100, 100], 50)
+        self.locations, _ = self.herd.as_numpy()
 
     def reset(self, herd_size=100, num_voters=50, radius=50) -> None:
         self.herd.reset(herd_size,radius=radius)
