@@ -1,0 +1,12 @@
+In this project, the following libraries are used:
+
+* numpy
+* matplotlib
+* scipy
+* networkx
+* random
+* collections
+* argparse
+
+All of them can be installed via pip.
+This code has been tested with Python 3.12.0 on Windows 11.
