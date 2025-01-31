@@ -1,8 +1,13 @@
-# css_2025
+# The Bison Moo-cracy, CSS 2025
+By Balthazar Dupuy d'Angeac, Ivana Malčić, Luke Kraakman and Thijs Stessen 
 
-We have roughly 5-10% ‘assert’ statements inline.
+A codebase for modeling the voting dynamics of bizons, either sequentially or synchronously. Some results can be found in the pretty plots folder and the file 'CSS final presentation.pptx' contains our slides on the topic.
 
-Functions from main can be called from seperate files to link analyses, this is how we used the code. For convenience an argument parser is included in the main file.
+We have roughly 5-10% ‘assert’ statements inline. Just thought you should know. (wink wink)
+
+## Usage
+### Sequential model
+Functions from main.py can be called to produce different results, this is how we used the code. For convenience an argument parser is included in the main file.
 The main file can be run using python main.py followed by the following arguments:
 
     Run various analysis and visualization functions for the voting simulation.
@@ -29,3 +34,24 @@ The main file can be run using python main.py followed by the following argument
     --run_animation r     Run an animation of the voting process for a given radius r.
 
   main.py uses voting.py, herd.py and sim.py for handeling the simulations. Data from all simulations is written to the 'results' directory.
+### Synchronous model
+  Code for the synchronous model can be found in ResearchNotebook.ipynb
+### Plotting
+  Plotting can be done by running loading_and_plotting.py. However this does require the correct experiment files to be present in the /results folder.
+### Other
+Older experiments like the boids model can be found in the unused folder.
+  ## Dependencies
+The following libraries are used in this project:
+- `numpy`
+- `matplotlib`
+- `scipy`
+- `networkx`
+
+All dependencies can be installed via `pip`.
+
+```
+pip install requirements.txt
+```
+## Compatibility
+This code has been tested with **Python 3.12.0** on **Windows 10/11**.
+
