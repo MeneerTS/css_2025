@@ -1,7 +1,7 @@
 # The Bison Moo-cracy, CSS 2025
 By Balthazar Dupuy d'Angeac, Ivana Malčić, Luke Kraakman and Thijs Stessen 
 
-A codebase for modeling the voting dynamics of bizons, either sequentially or synchronously. Some results can be found in the pretty plots folder and the file 'CSS final presentation.pptx' contains our slides on the topic.
+A codebase for modeling the voting dynamics of bizons, either sequentially or synchronously. Some results can be found in the results folder and the file 'CSS final presentation.pptx' contains our slides on the topic.
 
 We have roughly 5-10% ‘assert’ statements inline. Just thought you should know. (wink wink)
 
