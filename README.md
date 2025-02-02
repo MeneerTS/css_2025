@@ -39,7 +39,7 @@ The main file can be run using python main.py followed by the following argument
 ### Plotting
   Plotting can be done by running loading_and_plotting.py. However this does require the correct experiment files to be present in the /results folder.
 ### Other
-Older experiments like the boids model can be found in the unused folder.
+Older experiments like the boids model can be found in the unused folder. Plots in the presentation that don't have stdev for readability have the data available when experiments are run and are saved to the results directory.
   ## Dependencies
 The following libraries are used in this project:
 - `numpy`
