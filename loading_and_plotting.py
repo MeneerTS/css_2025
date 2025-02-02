@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from sim import Sim
 
 def bootstrap_ci(data, num_bootstrap_samples=10000, ci=95):
     """
@@ -45,6 +46,52 @@ def standardize_plot():
     plt.legend(fontsize=12,loc='upper left')
 
     plt.tight_layout()   
+
+def plot_voting(sim: Sim, show = True) -> tuple:
+    """
+    Plots colored points based on the votes of the bisons and their locations
+
+    Parameters:
+    sim: Sim - the simulation object
+    show: bool - whether to show the plot
+
+    Returns:
+    fig, ax, scat: tuple - the figure, axis and scatter objects
+    """
+    fig, ax = plt.subplots(1, 1)
+    ax.set_aspect('equal')
+    ax.set(xlim=[25, 175], ylim=[25, 175])
+    ax.set_xticks([])
+    ax.set_yticks([])
+    colors = ["blue" if vote[0] == 1 else "red" if vote[1] == 1 else "grey" for vote in sim.votes]
+    scat = ax.scatter(sim.locations[:, 0], sim.locations[:, 1], c=colors, s=30, zorder=1)
+    if show:
+        plt.show()
+    return fig, ax, scat
+
+
+def plot_spheres_of_influence(sim: Sim, r: float, show = True) -> tuple:
+    """
+    Plots colored points based on the votes of the bisons and their locations, and plot circles
+    around the voting bisons even if the unvoting bisons have voted through some other means (i.e.
+    influence from neighbours).
+
+    Parameters:
+    sim: Sim - the simulation object
+    r: float - the radius of the circles
+    show: bool - whether to show the plot
+
+    Returns:
+    fig, ax: tuple - the figure and axis objects
+    """
+    fig, ax, _ = plot_voting(sim, False)
+    for locationid in range(sim.num_voters):
+        circle = plt.Circle(sim.locations[locationid], r, fill=False)
+        ax.add_patch(circle)
+    if show:
+        plt.show()
+    return fig, ax
+
 
 def plot_non_voter_influence():
     """
@@ -165,6 +212,7 @@ def plot_r_analysis_with_standard_deviation(include_percolation_treshold=False):
     plt.show()
 
 if __name__ == '__main__':    
+    #Runs all the function that load data and save a plot
     plot_non_voter_influence()
     plot_r_analysis_with_standard_deviation(False)
     plot_r_analysis_with_standard_deviation(True)
