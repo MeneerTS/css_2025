@@ -1,7 +1,4 @@
-# Project Name
-
-## Overview
-This project uses various Python libraries for scientific computing, graph analysis, and visualization.
-
-## Installation
-To install the required dependencies, run:
+numpy
+matplotlib
+scipy
+networkx
