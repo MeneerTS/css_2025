@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from scipy.stats import sem, t
 
 def bootstrap_ci(data, num_bootstrap_samples=10000, ci=95):
     """
