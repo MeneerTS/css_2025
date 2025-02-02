@@ -76,6 +76,7 @@ class Herd:
         for i, bison in enumerate(self.bisons):
             bison.position = newpositions[i]
 
+
     def generate_positions(self, count,center,radius) -> list:
         """
         Generates a count sized list of (x,y) positions uniformly distributed in 
@@ -93,6 +94,8 @@ class Herd:
             y = center[1] + r * np.sin(theta)
             positions = np.stack((x, y), axis=-1)
         return positions
+    
+
     def reset(self, count = 100, center = [100, 100], radius = 50) -> None:
         """
         Resets the herd of bisons to a new configuration.
